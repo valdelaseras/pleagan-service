@@ -1,9 +1,17 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
+import { IPlea } from 'pleagan-model';
+import { Observable, of } from 'rxjs';
+import { PleaService } from '../../service/plea/plea.service';
 
 @Controller('plea')
 export class PleaController {
-    @Get()
-    getPleas(): Plea[] {
-
-    }
+  constructor(private pleaService: PleaService) {}
+  @Get('all')
+  getAllPleas(): Observable<IPlea[]> {
+    return this.pleaService.getAllPleas();
+  }
+  @Get(':id')
+  getPleaById( @Param() params ): Observable<IPlea> {
+    return this.pleaService.getPleaById( params.id );
+  }
 }
