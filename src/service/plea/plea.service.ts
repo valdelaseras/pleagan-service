@@ -20,7 +20,7 @@ const mockPleas = [
   new Plea(
     '1',
     '2021-02-01T01:00:00+12:00',
-    new Company('1', 'Kapiti Icecream', new Product('1', 'Boysenberry Icecream')),
+    new Company('1', 'Kapiti Icecream', new Product('1', 'Boysenberry Icecream', false )),
     PLEA_STATUS.UNNOTIFIED,
     mockPleagan,
     [mockPleagan],
@@ -29,8 +29,8 @@ const mockPleas = [
   new Plea(
     '2',
     '2021-02-02T01:00:00+12:00',
-    new Company('2', 'Quorn', new Product('2', 'Vegetarian Meal Meat Free Soy Free Pieces')),
-    PLEA_STATUS.UNNOTIFIED,
+    new Company('2', 'Quorn', new Product('2', 'Vegetarian Meal Meat Free Soy Free Pieces', false )),
+    PLEA_STATUS.COMPLIED,
     mockPleagan,
     [mockPleagan],
     '/assets/images/quorn.jpeg',
@@ -38,7 +38,7 @@ const mockPleas = [
   new Plea(
     '3',
     '2021-02-03T01:00:00+12:00',
-    new Company('3', 'Stoneleigh', new Product('3', 'Sauvignon Blanc')),
+    new Company('3', 'Stoneleigh', new Product('3', 'Sauvignon Blanc', false )),
     PLEA_STATUS.UNNOTIFIED,
     mockPleagan,
     [mockPleagan],
