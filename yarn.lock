@@ -4449,10 +4449,10 @@ pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-pleagan-model@^0.0.11:
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/pleagan-model/-/pleagan-model-0.0.11.tgz#8dd11699804652df4ff0c3430e7f7d61b4ce59ef"
-  integrity sha512-oPawZeqzyUrPrnyIndF/T/BHk2TXA2a9ZCs9lNB3WLQbaccE+pVUL/ifT/ZsAn98p7HxV9srZzOSbvmk7tW47w==
+pleagan-model@^0.0.13:
+  version "0.0.13"
+  resolved "https://registry.yarnpkg.com/pleagan-model/-/pleagan-model-0.0.13.tgz#61e779a4425cb11f58c3aeaf7a3378fa6b59a0e4"
+  integrity sha512-1R0YrUSc2CiJ9+6Fw4FP+R1xFI8Mknkjf6moeLPDRDW2POgozUmUICdMh975tGnu36HfLmC3doijWcLoL8XWUg==
   dependencies:
     tslint "^6.1.3"
     tslint-config-prettier "^1.18.0"
