@@ -1,12 +1,23 @@
-export class Product {
-  id: string;
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { IProduct } from 'pleagan-model';
+
+@Entity()
+export class Product implements IProduct {
+  @PrimaryGeneratedColumn()
+  id?: string;
+
+  @Column({ unique: true })
   name: string;
+
+  @Column()
   vegan: boolean;
-  ingredients: string[];
-  constructor(id: string, name: string, vegan: boolean, ingredients?: string[]) {
-    this.id = id;
+
+  @Column('simple-array')
+  animalIngredients: string[];
+
+  constructor(name: string, vegan: boolean, animalIngredients?: string[]) {
     this.name = name;
     this.vegan = vegan;
-    this.ingredients = ingredients || [];
+    this.animalIngredients = animalIngredients || [];
   }
 }

@@ -1,12 +1,19 @@
-import { Product } from '../../product/product.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Plea } from '../../plea/plea.entity';
+import { ICompany } from 'pleagan-model';
 
-export class Company {
-  id: string;
+@Entity()
+export class Company implements ICompany {
+  @PrimaryGeneratedColumn()
+  id?: string;
+
+  @Column()
   name: string;
-  products: Product[];
-  constructor(id: string, name: string, products: Product[]) {
-    this.id = id;
+
+  @OneToMany((type) => Plea, (plea) => plea.company)
+  pleas?: Plea[];
+
+  constructor(name: string) {
     this.name = name;
-    this.products = products;
   }
 }

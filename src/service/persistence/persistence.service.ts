@@ -13,7 +13,7 @@ export class PersistenceService {
   }
 
   private async connectToStorage(): Promise<void> {
-      console.log(path.join(__dirname, '../../model/**/*.entity.js'));
+    console.log(path.join(__dirname, '../../model/**/*.entity.js'));
     const connectionOptions = Object.assign(
       {
         entities: [path.join(__dirname, '../../model/**/*.entity.js')],
