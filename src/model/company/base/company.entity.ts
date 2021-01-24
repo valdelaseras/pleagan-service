@@ -1,4 +1,4 @@
-import { Product } from '../product/product.model';
+import { Product } from '../../product/product.entity';
 
 export class Company {
   id: string;

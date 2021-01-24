@@ -1,16 +1,24 @@
-import { Company } from '../company/company.model';
-import { Pleagan } from '../pleagan/pleagan.model';
+import { Company } from '../company/base/company.entity';
+import { Pleagan } from '../pleagan/pleagan.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { PLEA_STATUS } from 'pleagan-model';
 
+@Entity()
 export class Plea {
-  id: string;
+  @PrimaryGeneratedColumn()
+  id?: string;
+
+  @Column()
   status: PLEA_STATUS;
+
   creationTimestamp: string;
   company: Company;
   initiator: Pleagan;
   supporters: Pleagan[];
+
+  @Column()
   imageUrl: string;
   constructor(
-    id: string,
     creationTimestamp: string,
     company: Company,
     status: PLEA_STATUS,
@@ -18,7 +26,6 @@ export class Plea {
     supporters: Pleagan[],
     imageUrl: string,
   ) {
-    this.id = id;
     this.creationTimestamp = creationTimestamp;
     this.company = company;
     this.status = status;
@@ -26,12 +33,4 @@ export class Plea {
     this.supporters = supporters;
     this.imageUrl = imageUrl;
   }
-}
-
-export enum PLEA_STATUS {
-  UNNOTIFIED = 'Unnotified',
-  NOTIFIED = 'Notified',
-  RESPONDED = 'Responded',
-  AWAITING = 'Awaiting',
-  COMPLIED = 'Complied',
 }
