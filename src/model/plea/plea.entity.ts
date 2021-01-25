@@ -18,7 +18,7 @@ import { Product } from '../product';
 @Entity()
 export class Plea implements IPlea {
   @PrimaryGeneratedColumn()
-  id?: string;
+  id?: number;
 
   @Column()
   status: PLEA_STATUS;
@@ -53,12 +53,14 @@ export class Plea implements IPlea {
 
   @OneToOne(() => Product, {
     cascade: ['insert', 'update'],
+    eager: true,
   })
   @JoinColumn()
   nonVeganProduct: Product;
 
   @OneToOne(() => Product, {
     cascade: ['insert', 'update'],
+    eager: true,
   })
   @JoinColumn()
   veganProduct?: Product;

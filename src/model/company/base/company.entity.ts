@@ -5,7 +5,7 @@ import { ICompany } from 'pleagan-model';
 @Entity()
 export class Company implements ICompany {
   @PrimaryGeneratedColumn()
-  id?: string;
+  id?: number;
 
   @Column()
   name: string;

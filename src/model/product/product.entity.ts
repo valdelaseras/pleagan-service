@@ -4,7 +4,7 @@ import { IProduct } from 'pleagan-model';
 @Entity()
 export class Product implements IProduct {
   @PrimaryGeneratedColumn()
-  id?: string;
+  id?: number;
 
   @Column({ unique: true })
   name: string;

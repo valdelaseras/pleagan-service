@@ -70,7 +70,7 @@ export class PleaService {
     return this.pleaRepository.find();
   }
 
-  async getPleaById(id: string): Promise<Plea> {
+  async getPleaById(id: number): Promise<Plea> {
     try {
       return await this.pleaRepository.findOneOrFail({ id: id });
     } catch (e) {
@@ -104,7 +104,7 @@ export class PleaService {
     return await this.pleaRepository.save(_plea);
   }
 
-  async supportPlea(id: string, { name, email, message, location }: IPleagan): Promise<Plea> {
+  async supportPlea(id: number, { name, email, message, location }: IPleagan): Promise<Plea> {
     const plea = await this.getPleaById(id);
 
     if (plea.supporters.find((pleagan: Pleagan) => pleagan.email === email)) {
@@ -116,7 +116,7 @@ export class PleaService {
     return this.pleaRepository.save(plea);
   }
 
-  async addVeganProduct(id: string, veganProduct: IProduct): Promise<Plea> {
+  async addVeganProduct(id: number, veganProduct: IProduct): Promise<Plea> {
     const plea = await this.getPleaById(id);
     plea.veganProduct = await this.productService.createProduct(veganProduct.name, veganProduct.vegan);
 

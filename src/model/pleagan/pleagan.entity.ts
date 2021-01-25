@@ -5,7 +5,7 @@ import { IPleagan } from 'pleagan-model';
 @Entity()
 export class Pleagan implements IPleagan {
   @PrimaryGeneratedColumn()
-  id?: string;
+  id?: number;
 
   @Column()
   name: string;
