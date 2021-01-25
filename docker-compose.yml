@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql/mysql-server:latest
+
+    ports:
+      - 3307:3306
+
+    restart: always
+    container_name: db
+
+    environment:
+#      - MYSQL_ROOT_HOST=%
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=pleagan
+      - MYSQL_USER=pleagan
+      - MYSQL_PASSWORD=pleagan
+
+    networks:
+      - db
+networks:
+  external-net:
+    external:
+      name: external-net
+  db:
+    driver: bridge
