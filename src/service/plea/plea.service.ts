@@ -3,7 +3,7 @@ import { IPlea, IPleagan, IProduct, PLEA_STATUS } from 'pleagan-model';
 import { getRepository, QueryFailedError, Repository } from 'typeorm';
 import { PersistenceService } from '../persistence/persistence.service';
 import { LoggerService } from '../logger/logger.service';
-import { Plea, Pleagan, Product, Company } from '../../model';
+import { Company, Plea, Pleagan, Product } from '../../model';
 import { ProductService } from '../product/product.service';
 import { PleaganService } from '../pleagan/pleagan.service';
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError';
@@ -116,6 +116,7 @@ export class PleaService {
   async addVeganProduct(id: number, veganProduct: IProduct): Promise<Plea> {
     const plea = await this.getPleaById(id);
     plea.veganProduct = await this.productService.createProduct(veganProduct.name, veganProduct.vegan, veganProduct.imageUrl);
+    plea.status = PLEA_STATUS.COMPLIED;
 
     return this.pleaRepository.save(plea);
   }
