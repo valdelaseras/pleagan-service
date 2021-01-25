@@ -12,12 +12,16 @@ export class Product implements IProduct {
   @Column()
   vegan: boolean;
 
+  @Column()
+  imageUrl: string;
+
   @Column('simple-array')
   animalIngredients: string[];
 
-  constructor(name: string, vegan: boolean, animalIngredients?: string[]) {
+  constructor(name: string, vegan: boolean, imageUrl: string, animalIngredients?: string[]) {
     this.name = name;
     this.vegan = vegan;
+    this.imageUrl = imageUrl;
     this.animalIngredients = animalIngredients || [];
   }
 }

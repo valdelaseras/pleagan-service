@@ -48,9 +48,6 @@ export class Plea implements IPlea {
   @JoinTable()
   supporters: Pleagan[];
 
-  @Column()
-  imageUrl: string;
-
   @OneToOne(() => Product, {
     cascade: ['insert', 'update'],
     eager: true,
@@ -69,7 +66,6 @@ export class Plea implements IPlea {
     status: PLEA_STATUS,
     company: Company,
     initiator: Pleagan,
-    imageUrl: string,
     nonVeganProduct: Product,
     veganProduct: Product,
     supporters?: Pleagan[],
@@ -78,7 +74,6 @@ export class Plea implements IPlea {
     this.status = status;
     this.initiator = initiator;
     this.supporters = supporters;
-    this.imageUrl = imageUrl;
     this.nonVeganProduct = nonVeganProduct;
     this.veganProduct = veganProduct;
   }

@@ -16,9 +16,9 @@ export class ProductService {
     this.productRepository = getRepository(Product);
   };
 
-  async createProduct(name: string, vegan: boolean, animalIngredients: string[] = []): Promise<Product> {
+  async createProduct(name: string, vegan: boolean, imageUrl: string, animalIngredients: string[] = []): Promise<Product> {
     try {
-      const product = this.productRepository.create(new Product(name, vegan, animalIngredients));
+      const product = this.productRepository.create(new Product(name, vegan, imageUrl, animalIngredients));
       return await this.productRepository.save( product );
     } catch (e) {
       if ( e instanceof QueryFailedError && e.message.indexOf('Duplicate') >= 0) {

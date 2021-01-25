@@ -22,8 +22,7 @@ const mockPleas = [
     PLEA_STATUS.UNNOTIFIED,
     new Company('Kapiti Icecream'),
     mockPleagan,
-    'kapiti.jpg',
-    new Product('Boysenberry Icecream', false),
+    new Product('Boysenberry Icecream', false, 'kapiti.jpg'),
     null,
     [mockPleagan],
   ),
@@ -31,17 +30,15 @@ const mockPleas = [
     PLEA_STATUS.COMPLIED,
     new Company('Quorn'),
     mockPleagan,
-    'quorn.jpeg',
-    new Product('Vegetarian Meal Meat Free Soy Free Pieces', false),
-    new Product('Vegan Meal Meat Free Soy Free Pieces', true),
+    new Product('Vegetarian Meal Meat Free Soy Free Pieces', false, 'quorn.jpeg'),
+    new Product('Vegan Meal Meat Free Soy Free Pieces', true, 'quorn.jpeg'),
     [mockPleagan],
   ),
   new Plea(
     PLEA_STATUS.UNNOTIFIED,
     new Company('Stoneleigh'),
     mockPleagan,
-    'stoneleigh.jpeg',
-    new Product('Sauvignon Blanc', false),
+    new Product('Sauvignon Blanc', false, 'stoneleigh.jpeg'),
     null,
     [mockPleagan],
   ),
@@ -85,12 +82,12 @@ export class PleaService {
     company,
     status,
     initiator,
-    imageUrl,
     nonVeganProduct,
   }: IPlea): Promise<Plea> {
     const _nonVeganProduct = await this.productService.createProduct(
       nonVeganProduct.name,
       nonVeganProduct.vegan,
+      nonVeganProduct.imageUrl,
       nonVeganProduct.animalIngredients,
     );
     const _initiator = this.pleaganService.createPleagan(
@@ -100,7 +97,7 @@ export class PleaService {
       initiator.location,
     );
 
-    const _plea = this.createPlea(status, company, _initiator, imageUrl, _nonVeganProduct);
+    const _plea = this.createPlea(status, company, _initiator, _nonVeganProduct);
     return await this.pleaRepository.save(_plea);
   }
 
@@ -118,7 +115,7 @@ export class PleaService {
 
   async addVeganProduct(id: number, veganProduct: IProduct): Promise<Plea> {
     const plea = await this.getPleaById(id);
-    plea.veganProduct = await this.productService.createProduct(veganProduct.name, veganProduct.vegan);
+    plea.veganProduct = await this.productService.createProduct(veganProduct.name, veganProduct.vegan, veganProduct.imageUrl);
 
     return this.pleaRepository.save(plea);
   }
@@ -127,11 +124,10 @@ export class PleaService {
     status: PLEA_STATUS,
     company: Company,
     initiator: Pleagan,
-    imageUrl: string,
     nonVeganProduct: Product,
   ): Plea {
     return this.pleaRepository.create(
-      new Plea(status, company, initiator, imageUrl, nonVeganProduct, null, [initiator]),
+      new Plea(status, company, initiator, nonVeganProduct, null, [initiator]),
     );
   }
 
