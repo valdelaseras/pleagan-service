@@ -1,8 +1,9 @@
-import { Body, ConflictException, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, ConflictException, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { IPlea, IPleagan, IProduct } from 'pleagan-model';
 import { Observable, of } from 'rxjs';
 import { PleaService } from '../../service/plea/plea.service';
 import { Plea } from '../../model/plea/plea.entity';
+import { constants } from 'http2';
 
 @Controller('plea')
 export class PleaController {
@@ -14,22 +15,30 @@ export class PleaController {
   }
 
   @Get(':id')
-  getPleaById(@Param() params): Promise<Plea> {
-    return this.pleaService.getPleaById(params.id);
+  getPleaById(@Param('id') id): Promise<Plea> {
+    return this.pleaService.getPleaById(id);
+  }
+
+  @Get()
+  searchPleas(@Query('query') query): Promise<Plea[]> {
+    return this.pleaService.searchPleas(query);
   }
 
   @Post()
-  addPlea(@Body() plea: IPlea): Promise<Plea> {
-    return this.pleaService.addPlea(plea);
+  async addPlea(@Body() plea: IPlea): Promise<{ id: number }> {
+    const { id } = await this.pleaService.addPlea(plea);
+    return { id };
   }
 
   @Post(':id/support')
-  supportPlea(@Param() params, @Body() pleagan: IPleagan): Promise<Plea> {
-    return this.pleaService.supportPlea(params.id, pleagan);
+  async supportPlea(@Param('id') id, @Body() pleagan: IPleagan): Promise<void> {
+    await this.pleaService.supportPlea(id, pleagan);
+    return;
   }
 
   @Post(':id/vegan-product')
-  addVeganProduct(@Param() params, @Body() product: IProduct): Promise<Plea> {
-    return this.pleaService.addVeganProduct(params.id, product);
+  async addVeganProduct(@Param('id') id, @Body() product: IProduct): Promise<void> {
+    await this.pleaService.addVeganProduct(id, product);
+    return;
   }
 }

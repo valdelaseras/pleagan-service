@@ -1,12 +1,13 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { IPlea, IPleagan, IProduct, PLEA_STATUS } from 'pleagan-model';
-import { getRepository, QueryFailedError, Repository } from 'typeorm';
+import { getRepository, QueryFailedError, Repository, SelectQueryBuilder } from 'typeorm';
 import { PersistenceService } from '../persistence/persistence.service';
 import { LoggerService } from '../logger/logger.service';
 import { Company, Plea, Pleagan, Product } from '../../model';
 import { ProductService } from '../product/product.service';
 import { PleaganService } from '../pleagan/pleagan.service';
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError';
+import { CompanyService } from '../company/company.service';
 
 const mockPleagan = new Pleagan(
   'DolphinOnWheels',
@@ -51,6 +52,7 @@ export class PleaService {
   constructor(
     private persistenceService: PersistenceService,
     private productService: ProductService,
+    private companyService: CompanyService,
     private pleaganService: PleaganService,
   ) {
     this.persistenceService.connectionReadyEvent.attachOnce(this.initialiseRepository);
@@ -72,32 +74,28 @@ export class PleaService {
       return await this.pleaRepository.findOneOrFail({ id: id });
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
-        LoggerService.warn( e.message, this.namespace);
+        LoggerService.warn(e.message, this.namespace);
         throw new NotFoundException(`Plea with id ${id} could not be found.`);
       }
     }
   }
 
-  async addPlea({
-    company,
-    status,
-    initiator,
-    nonVeganProduct,
-  }: IPlea): Promise<Plea> {
+  async addPlea({ company, initiator, nonVeganProduct }: IPlea): Promise<Plea> {
     const _nonVeganProduct = await this.productService.createProduct(
       nonVeganProduct.name,
       nonVeganProduct.vegan,
       nonVeganProduct.imageUrl,
       nonVeganProduct.animalIngredients,
     );
-    const _initiator = this.pleaganService.createPleagan(
+    const _initiator = await this.pleaganService.createPleagan(
       initiator.name,
       initiator.email,
       initiator.message,
       initiator.location,
     );
+    const _company = await this.companyService.createCompany(company.name);
 
-    const _plea = this.createPlea(status, company, _initiator, _nonVeganProduct);
+    const _plea = this.createPlea(PLEA_STATUS.UNNOTIFIED, _company, _initiator, _nonVeganProduct);
     return await this.pleaRepository.save(_plea);
   }
 
@@ -115,21 +113,67 @@ export class PleaService {
 
   async addVeganProduct(id: number, veganProduct: IProduct): Promise<Plea> {
     const plea = await this.getPleaById(id);
-    plea.veganProduct = await this.productService.createProduct(veganProduct.name, veganProduct.vegan, veganProduct.imageUrl);
+    plea.veganProduct = await this.productService.createProduct(
+      veganProduct.name,
+      veganProduct.vegan,
+      veganProduct.imageUrl,
+    );
     plea.status = PLEA_STATUS.COMPLIED;
 
     return this.pleaRepository.save(plea);
   }
 
-  createPlea(
-    status: PLEA_STATUS,
-    company: Company,
-    initiator: Pleagan,
-    nonVeganProduct: Product,
-  ): Plea {
-    return this.pleaRepository.create(
-      new Plea(status, company, initiator, nonVeganProduct, null, [initiator]),
-    );
+  searchPleas(query: string): Promise<Plea[]> {
+    const parsedQuery = query.indexOf(' ') >= 0 ? this.parseQuery(query) : { products: [query], companies: [query] };
+    return this.pleaRepository.find({
+      where: (qb: SelectQueryBuilder<Plea[]>) => this.buildQueryString(qb, parsedQuery),
+    });
+  }
+
+  createPlea(status: PLEA_STATUS, company: Company, initiator: Pleagan, nonVeganProduct: Product): Plea {
+    return this.pleaRepository.create(new Plea(status, company, initiator, nonVeganProduct, null, [initiator]));
+  }
+
+  private parseQuery(query: string): { companies: string[]; products: string[] } {
+    const parsedQuery = {
+      companies: [],
+      products: [],
+    };
+
+    for (const fragment of query.split(' ')) {
+      if (this.productService.isKnownProduct(fragment)) {
+        parsedQuery['products'].push(fragment);
+      }
+
+      if (this.companyService.isKnownCompany(fragment)) {
+        parsedQuery['companies'].push(fragment);
+      }
+    }
+    return parsedQuery;
+  }
+
+  private buildQueryString(
+    qb: SelectQueryBuilder<Plea[]>,
+    parsedQuery: { products: string[]; companies: string[] },
+  ): void {
+    let queryString = '';
+    const params = {};
+
+    if (parsedQuery.products.length) {
+      queryString += 'Plea_nonVeganProduct.name REGEXP :productNames';
+      params['productNames'] = parsedQuery.products.join('|');
+    }
+
+    if (parsedQuery.products.length && parsedQuery.companies.length) {
+      queryString += ' OR ';
+    }
+
+    if (parsedQuery.companies.length) {
+      queryString += 'Plea_company.name REGEXP :companyNames';
+      params['companyNames'] = parsedQuery.companies.join('|');
+    }
+
+    qb.where(queryString, params);
   }
 
   private async insertMockEntities(): Promise<void> {
@@ -138,7 +182,7 @@ export class PleaService {
       LoggerService.debug('Mock plea entities were inserted successfully', this.namespace);
     } catch (e) {
       if (e instanceof QueryFailedError && e.message.indexOf('Duplicate') >= 0) {
-        LoggerService.warn( e.message, this.namespace);
+        LoggerService.warn(e.message, this.namespace);
         LoggerService.debug('Mock plea entities have already been inserted', this.namespace);
       }
     }
