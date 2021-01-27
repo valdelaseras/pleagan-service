@@ -6,8 +6,8 @@ import { Company } from '../../model/company/base';
 
 @Injectable()
 export class CompanyService {
-  private namespace = 'company-service';
-  private knownCompanyNames: string[];
+  private __namespace__ = 'company-service';
+  private __knownCompanyNames__: string[];
   companyRepository: Repository<Company>;
   constructor(private persistenceService: PersistenceService) {
     this.persistenceService.connectionReadyEvent.attachOnce(this.initialiseRepository);
@@ -15,9 +15,15 @@ export class CompanyService {
 
   isKnownCompany(name: string): boolean {
     return (
-      this.knownCompanyNames.filter((knownCompanyName: string) => knownCompanyName.indexOf(name.toLowerCase()) >= 0)
+      this.__knownCompanyNames__.filter((knownCompanyName: string) => knownCompanyName.indexOf(name.toLowerCase()) >= 0)
         .length > 0
     );
+  }
+
+  getKnownCompanies(): Promise<string[]> {
+    return new Promise( ( resolve ) => {
+      resolve( this.__knownCompanyNames__ );
+    });
   }
 
   async getAllCompanies(): Promise<Company[]> {
@@ -33,7 +39,7 @@ export class CompanyService {
       return company;
     } catch (e) {
       if (e instanceof QueryFailedError && e.message.indexOf('Duplicate') >= 0) {
-        LoggerService.warn(e.message, this.namespace);
+        LoggerService.warn(e.message, this.__namespace__);
         // @TODO return proper error. Is an error even likely here?
         throw new ConflictException(`Oopsie doopsie`);
       }
@@ -42,7 +48,7 @@ export class CompanyService {
 
   private initialiseRepository = async (): Promise<void> => {
     this.companyRepository = getRepository(Company);
-    this.knownCompanyNames = await this.retrieveKnownCompanyNames();
+    this.__knownCompanyNames__ = await this.retrieveKnownCompanyNames();
   };
 
   private async retrieveKnownCompanyNames(): Promise<string[]> {
@@ -53,7 +59,7 @@ export class CompanyService {
 
   private addCompanyToKnownCompanies(name: string): void {
     if (!this.isKnownCompany(name)) {
-      this.knownCompanyNames.push(name);
+      this.__knownCompanyNames__.push(name);
     }
   }
 }

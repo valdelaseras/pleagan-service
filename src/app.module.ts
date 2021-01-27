@@ -7,6 +7,8 @@ import { LoggerService } from './service/logger/logger.service';
 import { ProductService } from './service/product/product.service';
 import { PleaganService } from './service/pleagan/pleagan.service';
 import { CompanyService } from './service/company/company.service';
+import { CompanyController } from './controller/company/company.controller';
+import { ProductController } from './controller/product/product.controller';
 
 const services = [
   PleaService,
@@ -20,7 +22,7 @@ const services = [
 
 @Module({
   imports: [],
-  controllers: [PleaController],
+  controllers: [PleaController, CompanyController, ProductController],
   providers: services,
 })
 export class AppModule {}

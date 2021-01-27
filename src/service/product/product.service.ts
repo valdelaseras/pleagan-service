@@ -3,11 +3,12 @@ import { PersistenceService } from '../persistence/persistence.service';
 import { getRepository, QueryFailedError, Repository } from 'typeorm';
 import { Product } from '../../model/product';
 import { LoggerService } from '../logger/logger.service';
+import { Company } from '../../model/company/base';
 
 @Injectable()
 export class ProductService {
   private namespace = 'product-service';
-  private knownProductNames: string[];
+  private __knownProductNames__: string[];
   productRepository: Repository<Product>;
   constructor(private persistenceService: PersistenceService) {
     this.persistenceService.connectionReadyEvent.attachOnce(this.initialiseRepository);
@@ -15,9 +16,19 @@ export class ProductService {
 
   isKnownProduct(name: string): boolean {
     return (
-      this.knownProductNames.filter((knownProductName: string) => knownProductName.indexOf(name.toLowerCase()) >= 0)
+      this.__knownProductNames__.filter((knownProductName: string) => knownProductName.indexOf(name.toLowerCase()) >= 0)
         .length > 0
     );
+  }
+
+  getKnownProducts(): Promise<string[]> {
+    return new Promise( ( resolve ) => {
+      resolve( this.__knownProductNames__ );
+    });
+  }
+
+  async getAllProducts(): Promise<Company[]> {
+    return this.productRepository.find();
   }
 
   async createProduct(
@@ -42,7 +53,7 @@ export class ProductService {
 
   private initialiseRepository = async (): Promise<void> => {
     this.productRepository = getRepository(Product);
-    this.knownProductNames = await this.retrieveKnownProductNames();
+    this.__knownProductNames__ = await this.retrieveKnownProductNames();
   };
 
   private async retrieveKnownProductNames(): Promise<string[]> {
@@ -55,7 +66,7 @@ export class ProductService {
 
   private addProductToKnownProducts(name: string): void {
     if (!this.isKnownProduct(name)) {
-      this.knownProductNames.push(name);
+      this.__knownProductNames__.push(name);
     }
   }
 }
