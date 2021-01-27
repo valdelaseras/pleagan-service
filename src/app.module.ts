@@ -6,8 +6,17 @@ import { ConfigurationService } from './service/configuration/configuration.serv
 import { LoggerService } from './service/logger/logger.service';
 import { ProductService } from './service/product/product.service';
 import { PleaganService } from './service/pleagan/pleagan.service';
+import { CompanyService } from './service/company/company.service';
 
-const services = [PleaService, ProductService, PleaganService, PersistenceService, ConfigurationService, LoggerService];
+const services = [
+  PleaService,
+  ProductService,
+  CompanyService,
+  PleaganService,
+  PersistenceService,
+  ConfigurationService,
+  LoggerService,
+];
 
 @Module({
   imports: [],
