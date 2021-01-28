@@ -6,7 +6,7 @@ import * as moment from 'moment';
  * @namespace LoggerService
  */
 export class LoggerService {
-  private static appName = `pleagan`;
+  private static __appName__ = `pleagan`;
 
   /**
    * @access private
@@ -23,8 +23,8 @@ export class LoggerService {
    * @param {boolean} addTimestamp Add timestamp to logged message
    * @returns {string} Formatted message
    */
-  private static formatMessage(message: string | Error, namespace?: string, addTimestamp: boolean = true): string {
-    return `${addTimestamp ? LoggerService.getTimestamp() : ''} ${Chalk.red.bold(LoggerService.appName)}${
+  private static formatMessage(message: string | Error, namespace?: string, addTimestamp = true): string {
+    return `${addTimestamp ? LoggerService.getTimestamp() : ''} ${Chalk.red.bold(LoggerService.__appName__)}${
       namespace ? LoggerService.formatNamespace(namespace) : ''
     } ${message}`;
   }

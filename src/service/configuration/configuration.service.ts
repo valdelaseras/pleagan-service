@@ -4,18 +4,18 @@ import { AppConfiguration, DatabaseConfiguration, databaseTypes, IArguments } fr
 
 @singleton()
 export class ConfigurationService {
-  private readonly arguments: IArguments;
+  private readonly __arguments__: IArguments;
 
   get databaseConfiguration(): DatabaseConfiguration {
-    return new DatabaseConfiguration(this.arguments);
+    return new DatabaseConfiguration(this.__arguments__);
   }
 
   get appConfiguration(): AppConfiguration {
-    return new AppConfiguration(this.arguments);
+    return new AppConfiguration(this.__arguments__);
   }
 
   constructor() {
-    this.arguments = yargs
+    this.__arguments__ = yargs
       .options({
         d: { type: 'boolean', description: 'Enable debug logging', default: false, alias: 'debug' },
         ds: { type: 'string', description: 'Database schema to use', default: 'pleagan', alias: 'database-schema' },

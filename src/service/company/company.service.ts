@@ -15,7 +15,7 @@ export class CompanyService {
 
   isKnownCompany(name: string): boolean {
     return (
-      this.__knownCompanyNames__.filter((knownCompanyName: string) => knownCompanyName.indexOf(name.toLowerCase()) >= 0)
+      this.__knownCompanyNames__.filter((knownCompanyName: string) => knownCompanyName.toLowerCase().indexOf(name.toLowerCase()) >= 0)
         .length > 0
     );
   }
@@ -54,7 +54,7 @@ export class CompanyService {
   private async retrieveKnownCompanyNames(): Promise<string[]> {
     const knownCompanies = await this.getAllCompanies();
 
-    return knownCompanies.map(({ name }) => name.toLowerCase());
+    return knownCompanies.map(({ name }) => name);
   }
 
   private addCompanyToKnownCompanies(name: string): void {

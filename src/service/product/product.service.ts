@@ -7,7 +7,7 @@ import { Company } from '../../model/company/base';
 
 @Injectable()
 export class ProductService {
-  private namespace = 'product-service';
+  private __namespace__ = 'product-service';
   private __knownProductNames__: string[];
   productRepository: Repository<Product>;
   constructor(private persistenceService: PersistenceService) {
@@ -45,7 +45,7 @@ export class ProductService {
       return product;
     } catch (e) {
       if (e instanceof QueryFailedError && e.message.indexOf('Duplicate') >= 0) {
-        LoggerService.warn(e.message, this.namespace);
+        LoggerService.warn(e.message, this.__namespace__);
         throw new ConflictException(`Product with name ${name} is already assigned to a plea.`);
       }
     }
@@ -66,7 +66,7 @@ export class ProductService {
 
   private addProductToKnownProducts(name: string): void {
     if (!this.isKnownProduct(name)) {
-      this.__knownProductNames__.push(name);
+      this.__knownProductNames__.push(name.toLowerCase());
     }
   }
 }
