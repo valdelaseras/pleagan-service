@@ -1,23 +1,23 @@
-import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm';
 import { Plea } from '../plea';
 import { IPleagan } from 'pleagan-model';
 
 @Entity()
 export class Pleagan implements IPleagan {
-  @PrimaryGeneratedColumn()
-  id?: number;
-
-  @Column()
-  name: string;
+  @PrimaryColumn()
+  uid: string;
 
   @Column()
   email: string;
 
-  @Column('text')
-  message?: string;
+  @Column()
+  emailVerified: boolean;
 
   @Column()
-  location?: string;
+  displayName?: string;
+
+  @Column()
+  country?: string;
 
   @OneToMany((type) => Plea, (plea) => plea.initiator)
   initiatedPleas?: Plea[];
@@ -25,10 +25,9 @@ export class Pleagan implements IPleagan {
   @ManyToMany((type) => Plea, (plea) => plea.supporters)
   supportedPleas?: Plea[];
 
-  constructor(name: string, email: string, message?: string, location?: string) {
-    this.name = name;
+  constructor(displayName: string, email: string, country?: string) {
+    this.displayName = displayName;
     this.email = email;
-    this.message = message || undefined;
-    this.location = location || undefined;
+    this.country = country || undefined;
   }
 }

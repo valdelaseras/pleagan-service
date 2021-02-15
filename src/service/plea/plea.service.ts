@@ -12,9 +12,6 @@ import { CompanyService } from '../company/company.service';
 const mockPleagan = new Pleagan(
   'DolphinOnWheels',
   'cetaceanrave@sea.com',
-  'I loved this product so much and used to buy it a lot. Giving it up after going vegan has ' +
-    'been hard but it needed to be done. I would be so happy if you could create a vegan ' +
-    'version of this!',
   'Wellington',
 );
 
@@ -83,30 +80,31 @@ export class PleaService {
   async addPlea({ company, initiator, nonVeganProduct }: IPlea): Promise<Plea> {
     const _nonVeganProduct = await this.productService.createProduct(
       nonVeganProduct.name,
-      nonVeganProduct.vegan,
+      false,
       nonVeganProduct.imageUrl,
       nonVeganProduct.animalIngredients,
     );
     const _initiator = await this.pleaganService.createPleagan(
-      initiator.name,
+      initiator.displayName,
       initiator.email,
-      initiator.message,
-      initiator.location,
+      initiator.country,
     );
     const _company = await this.companyService.createCompany(company.name);
+
+    console.log( _initiator );
 
     const _plea = this.createPlea(PLEA_STATUS.UNNOTIFIED, _company, _initiator, _nonVeganProduct);
     return await this.pleaRepository.save(_plea);
   }
 
-  async supportPlea(id: number, { name, email, message, location }: IPleagan): Promise<Plea> {
+  async supportPlea(id: number, { displayName, email, country }: IPleagan): Promise<Plea> {
     const plea = await this.getPleaById(id);
 
     if (plea.supporters.find((pleagan: Pleagan) => pleagan.email === email)) {
       throw new ConflictException(`Pleagan with email address ${email} has already supported this plea.`);
     }
 
-    plea.supporters.push(new Pleagan(name, email, message, location));
+    plea.supporters.push(new Pleagan(displayName, email, country));
 
     return this.pleaRepository.save(plea);
   }

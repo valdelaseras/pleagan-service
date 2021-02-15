@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Plea } from '../../plea/plea.entity';
+import { Plea } from '../../';
 import { ICompany } from 'pleagan-model';
 
 @Entity()

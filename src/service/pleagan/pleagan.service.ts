@@ -12,12 +12,10 @@ export class PleaganService {
     this.persistenceService.connectionReadyEvent.attachOnce(this.initialiseRepository);
   }
 
-  async createPleagan(name: string, email: string, message?: string, location?: string): Promise<Pleagan> {
+  async createPleagan(name: string, email: string, country?: string): Promise<Pleagan> {
     try {
-      const pleagan = this.pleaganRepository.create(new Pleagan(name, email, message, location));
-      await this.pleaganRepository.save(pleagan);
-
-      return pleagan;
+      const pleagan = this.pleaganRepository.create(new Pleagan(name, email, country));
+      return this.pleaganRepository.save(pleagan);
     } catch (e) {
       if (e instanceof QueryFailedError && e.message.indexOf('Duplicate') >= 0) {
         LoggerService.warn(e.message, this.namespace);

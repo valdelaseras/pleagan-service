@@ -28,7 +28,7 @@
     "evt": "^1.9.12",
     "moment": "^2.29.1",
     "mysql2": "^2.2.5",
-    "pleagan-model": "^0.0.22",
+    "pleagan-model": "^0.0.25",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.3",
