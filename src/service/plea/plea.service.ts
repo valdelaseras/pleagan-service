@@ -10,6 +10,7 @@ import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError';
 import { CompanyService } from '../company/company.service';
 
 const mockPleagan = new Pleagan(
+    'some-stupid-uuid',
   'DolphinOnWheels',
   'cetaceanrave@sea.com',
   'Wellington',
@@ -90,9 +91,6 @@ export class PleaService {
       initiator.country,
     );
     const _company = await this.companyService.createCompany(company.name);
-
-    console.log( _initiator );
-
     const _plea = this.createPlea(PLEA_STATUS.UNNOTIFIED, _company, _initiator, _nonVeganProduct);
     return await this.pleaRepository.save(_plea);
   }
@@ -179,6 +177,7 @@ export class PleaService {
       await this.pleaRepository.save(mockPleas);
       LoggerService.debug('Mock plea entities were inserted successfully', this.namespace);
     } catch (e) {
+      console.log(e);
       if (e instanceof QueryFailedError && e.message.indexOf('Duplicate') >= 0) {
         LoggerService.warn(e.message, this.namespace);
         LoggerService.debug('Mock plea entities have already been inserted', this.namespace);

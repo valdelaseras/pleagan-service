@@ -11,7 +11,7 @@ export class Pleagan implements IPleagan {
   email: string;
 
   @Column()
-  emailVerified: boolean;
+  emailVerified: boolean = false;
 
   @Column()
   displayName?: string;
@@ -25,7 +25,8 @@ export class Pleagan implements IPleagan {
   @ManyToMany((type) => Plea, (plea) => plea.supporters)
   supportedPleas?: Plea[];
 
-  constructor(displayName: string, email: string, country?: string) {
+  constructor(uid: string, displayName: string, email: string, country?: string) {
+    this.uid = uid;
     this.displayName = displayName;
     this.email = email;
     this.country = country || undefined;
