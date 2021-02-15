@@ -14,6 +14,9 @@ export class Pleagan implements IPleagan {
   emailVerified: boolean = false;
 
   @Column()
+  photoUrl?: string = '';
+
+  @Column()
   displayName?: string;
 
   @Column()
