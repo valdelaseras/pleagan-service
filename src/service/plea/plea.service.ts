@@ -85,7 +85,7 @@ export class PleaService {
       nonVeganProduct.imageUrl,
       nonVeganProduct.animalIngredients,
     );
-    const _initiator = await this.pleaganService.createPleagan(
+    const _initiator = await this.pleaganService.addPleagan(
       initiator.displayName,
       initiator.email,
       initiator.country,

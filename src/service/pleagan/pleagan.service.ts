@@ -3,6 +3,7 @@ import { PersistenceService } from '../persistence/persistence.service';
 import { getRepository, QueryFailedError, Repository } from 'typeorm';
 import { LoggerService } from '../logger/logger.service';
 import { Pleagan } from '../../model/pleagan';
+import { IPleagan } from 'pleagan-model';
 
 @Injectable()
 export class PleaganService {
@@ -12,9 +13,9 @@ export class PleaganService {
     this.persistenceService.connectionReadyEvent.attachOnce(this.initialiseRepository);
   }
 
-  async createPleagan(name: string, email: string, country?: string): Promise<Pleagan> {
+  async addPleagan( { uid, displayName, email , emailVerified}: IPleagan): Promise<Pleagan> {
     try {
-      const pleagan = this.pleaganRepository.create(new Pleagan(name, email, country));
+      const pleagan = this.pleaganRepository.create(new Pleagan(uid, displayName, email, emailVerified));
       return this.pleaganRepository.save(pleagan);
     } catch (e) {
       if (e instanceof QueryFailedError && e.message.indexOf('Duplicate') >= 0) {
