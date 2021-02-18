@@ -13,7 +13,7 @@ const mockPleagan = new Pleagan(
     'some-stupid-uuid',
   'DolphinOnWheels',
   'cetaceanrave@sea.com',
-  'Wellington',
+  false
 );
 
 const mockPleas = [
@@ -69,7 +69,7 @@ export class PleaService {
 
   async getPleaById(id: number): Promise<Plea> {
     try {
-      return await this.pleaRepository.findOneOrFail({ id: id });
+      return await this.pleaRepository.findOneOrFail({ id });
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
         LoggerService.warn(e.message, this.namespace);
@@ -86,23 +86,21 @@ export class PleaService {
       nonVeganProduct.animalIngredients,
     );
     const _initiator = await this.pleaganService.addPleagan(
-      initiator.displayName,
-      initiator.email,
-      initiator.country,
+      initiator,
     );
     const _company = await this.companyService.createCompany(company.name);
     const _plea = this.createPlea(PLEA_STATUS.UNNOTIFIED, _company, _initiator, _nonVeganProduct);
     return await this.pleaRepository.save(_plea);
   }
 
-  async supportPlea(id: number, { displayName, email, country }: IPleagan): Promise<Plea> {
+  async supportPlea(id: number, { uid, displayName, email, emailVerified}: IPleagan): Promise<Plea> {
     const plea = await this.getPleaById(id);
 
     if (plea.supporters.find((pleagan: Pleagan) => pleagan.email === email)) {
       throw new ConflictException(`Pleagan with email address ${email} has already supported this plea.`);
     }
 
-    plea.supporters.push(new Pleagan(displayName, email, country));
+    plea.supporters.push(new Pleagan(uid, displayName, email, emailVerified));
 
     return this.pleaRepository.save(plea);
   }
@@ -177,7 +175,6 @@ export class PleaService {
       await this.pleaRepository.save(mockPleas);
       LoggerService.debug('Mock plea entities were inserted successfully', this.namespace);
     } catch (e) {
-      console.log(e);
       if (e instanceof QueryFailedError && e.message.indexOf('Duplicate') >= 0) {
         LoggerService.warn(e.message, this.namespace);
         LoggerService.debug('Mock plea entities have already been inserted', this.namespace);

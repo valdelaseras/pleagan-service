@@ -10,17 +10,17 @@ export class Pleagan implements IPleagan {
   @Column()
   email: string;
 
-  @Column()
+  @Column('bool')
   emailVerified = false;
 
   @Column()
   photoUrl?: string = '';
 
   @Column()
-  displayName?: string;
+  displayName?: string = '';
 
   @Column()
-  country?: string;
+  country?: string = '';
 
   @OneToMany((type) => Plea, (plea) => plea.initiator)
   initiatedPleas?: Plea[];
@@ -32,7 +32,7 @@ export class Pleagan implements IPleagan {
     this.uid = uid;
     this.displayName = displayName;
     this.email = email;
-    this.country = country || undefined;
+    this.country = country || '';
     this.emailVerified = emailVerified;
   }
 }
