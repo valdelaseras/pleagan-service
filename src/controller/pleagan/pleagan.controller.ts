@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Req } from '@nestjs/common';
 import { IPleagan } from 'pleagan-model';
 import { PleaganService } from '../../service/pleagan/pleagan.service';
 import { Request } from 'express';
@@ -19,6 +19,11 @@ export class PleaganController {
     async getCurrentUser(@Req() req: Request): Promise<Pleagan> {
         const { uid } = req['firebaseUser'];
         return this.pleaganService.getPleaganById( uid );
+    }
+
+    @Put(':uid')
+    async updatePleagan(@Body() pleagan: IPleagan, @Param() { uid }): Promise<void> {
+        return this.pleaganService.updatePleagan( uid, pleagan );
     }
 
 }

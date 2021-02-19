@@ -38,9 +38,9 @@ export class PleaganService {
     }
   }
 
-  async updatePleagan( pleagan: IPleagan): Promise<void> {
+  async updatePleagan( uid: string, pleagan: IPleagan): Promise<void> {
     try {
-      await this.pleaganRepository.update( pleagan.uid, pleagan );
+      await this.pleaganRepository.update( uid, pleagan );
     } catch (e) {
       if (e instanceof QueryFailedError && e.message.indexOf('Duplicate') >= 0) {
         LoggerService.warn(e.message, this.namespace);
