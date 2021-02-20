@@ -27,7 +27,7 @@ export class PleaganService {
     }
   }
 
-  async getPleaganById( uid: string ): Promise<Pleagan> {
+  async getPleaganByUid( uid: string ): Promise<Pleagan> {
     try {
       return await this.pleaganRepository.findOneOrFail({ uid });
     } catch (e) {

@@ -866,11 +866,6 @@
   resolved "https://registry.yarnpkg.com/@sqltools/formatter/-/formatter-1.2.2.tgz#9390a8127c0dcba61ebd7fdcc748655e191bdd68"
   integrity sha512-/5O7Fq6Vnv8L6ucmPjaWbVG1XkP4FO+w5glqfkIsq3Xw4oyNAdJddbnYodNDAfjVUvo/rrSCTom4kAND7T1o5Q==
 
-"@tfarras/nestjs-firebase-auth@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@tfarras/nestjs-firebase-auth/-/nestjs-firebase-auth-1.0.0.tgz#6445bb3f628169c0a0c268fe45ca70e772f35a33"
-  integrity sha512-Zklaxjl2y4p91QrALjesuN+DnUhTLe5Ad6EZrQ8NJalF0gwgWtq1P9wV5z2ZpXTsnd5+t6a9pyQpcc0wFzwxKA==
-
 "@tootallnate/once@1":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
@@ -5281,10 +5276,10 @@ pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-pleagan-model@^0.0.25:
-  version "0.0.25"
-  resolved "https://registry.yarnpkg.com/pleagan-model/-/pleagan-model-0.0.25.tgz#219adf46aeea8f3bd1ef6e009686630daa57df56"
-  integrity sha512-bWVzOrtohhe0da9UPu0ZvP6QmmBjQLiSvFYRAZHemDXV15mxQiDpNxzLnwEAKPRbhbb1uVUGPuHPQ49TguZJ/w==
+pleagan-model@^0.0.33:
+  version "0.0.33"
+  resolved "https://registry.yarnpkg.com/pleagan-model/-/pleagan-model-0.0.33.tgz#920a76f61b4d751b88fbaa62976492691044ce82"
+  integrity sha512-o4E6b0H+UUdhXQtTZtsIOF3SaTFiuB8I2SYfbkb4ynaxEP2rv+bpFFFKO3nV+aQjDGjgCeiTrcJRpAT6bKr1Ew==
   dependencies:
     tslint "^6.1.3"
     tslint-config-prettier "^1.18.0"

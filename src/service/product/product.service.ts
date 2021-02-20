@@ -32,10 +32,10 @@ export class ProductService {
   }
 
   async createProduct(
-    name: string,
-    vegan: boolean,
-    imageUrl: string,
-    animalIngredients: string[] = [],
+      name: string,
+      vegan: boolean,
+      imageUrl: string,
+      animalIngredients: string[] = [],
   ): Promise<Product> {
     try {
       const product = this.productRepository.create(new Product(name, vegan, imageUrl, animalIngredients));

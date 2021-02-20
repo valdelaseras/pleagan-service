@@ -1,9 +1,8 @@
-import { Body, ConflictException, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { IPlea, IPleagan, IProduct } from 'pleagan-model';
-import { Observable, of } from 'rxjs';
+import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
+import { IPlea, IProduct } from 'pleagan-model';
 import { PleaService } from '../../service/plea/plea.service';
-import { Plea } from '../../model/plea/plea.entity';
-import { constants } from 'http2';
+import { Plea } from '../../model/plea';
+import { Request } from 'express';
 
 @Controller('plea')
 export class PleaController {
@@ -25,14 +24,14 @@ export class PleaController {
   }
 
   @Post()
-  async addPlea(@Body() plea: IPlea): Promise<{ id: number }> {
-    const { id } = await this.pleaService.addPlea(plea);
+  async addPlea(@Body() plea: IPlea, @Req() request: Request): Promise<{ id: number }> {
+    const { id } = await this.pleaService.addPlea( plea, request['firebaseUser'].uid );
     return { id };
   }
 
   @Post(':id/support')
-  async supportPlea(@Param('id') id, @Body() pleagan: IPleagan): Promise<void> {
-    await this.pleaService.supportPlea(id, pleagan);
+  async supportPlea(@Param('id') id, @Req() request: Request): Promise<void> {
+    await this.pleaService.supportPlea(id, request['firebaseUser'].uid);
     return;
   }
 

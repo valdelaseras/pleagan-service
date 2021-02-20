@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm';
 import { Plea } from '../plea';
 import { IPleagan } from 'pleagan-model';
+import { IUserSettings } from 'pleagan-model/dist/model/pleagan/settings/user-settings.interface';
 
 @Entity()
 export class Pleagan implements IPleagan {
@@ -27,6 +28,8 @@ export class Pleagan implements IPleagan {
 
   @ManyToMany((type) => Plea, (plea) => plea.supporters)
   supportedPleas?: Plea[];
+
+  settings: IUserSettings;
 
   constructor(uid: string, displayName: string, email: string, emailVerified: boolean, country?: string) {
     this.uid = uid;

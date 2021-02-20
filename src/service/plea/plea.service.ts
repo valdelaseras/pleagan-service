@@ -1,5 +1,5 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { IPlea, IPleagan, IProduct, PLEA_STATUS } from 'pleagan-model';
+import {  Injectable, NotFoundException } from '@nestjs/common';
+import { IPlea, IProduct, PLEA_STATUS } from 'pleagan-model';
 import { getRepository, QueryFailedError, Repository, SelectQueryBuilder } from 'typeorm';
 import { PersistenceService } from '../persistence/persistence.service';
 import { LoggerService } from '../logger/logger.service';
@@ -18,28 +18,25 @@ const mockPleagan = new Pleagan(
 
 const mockPleas = [
   new Plea(
-    PLEA_STATUS.UNNOTIFIED,
+      'lorem ipsum',
     new Company('Kapiti Icecream'),
     mockPleagan,
     new Product('Boysenberry Icecream', false, 'kapiti.jpg'),
-    null,
-    [mockPleagan],
+      [mockPleagan]
   ),
   new Plea(
-    PLEA_STATUS.COMPLIED,
+      'lorem ipsum',
     new Company('Quorn'),
     mockPleagan,
     new Product('Vegetarian Meal Meat Free Soy Free Pieces', false, 'quorn.jpeg'),
-    new Product('Vegan Meal Meat Free Soy Free Pieces', true, 'quorn.jpeg'),
-    [mockPleagan],
+      [mockPleagan]
   ),
   new Plea(
-    PLEA_STATUS.UNNOTIFIED,
+      'lorem ipsum',
     new Company('Stoneleigh'),
     mockPleagan,
     new Product('Sauvignon Blanc', false, 'stoneleigh.jpeg'),
-    null,
-    [mockPleagan],
+      [mockPleagan]
   ),
 ];
 
@@ -78,29 +75,38 @@ export class PleaService {
     }
   }
 
-  async addPlea({ company, initiator, nonVeganProduct }: IPlea): Promise<Plea> {
+  async addPlea({ description, company, nonVeganProduct }: IPlea, pleaganUid: string): Promise<Plea> {
+    // Create and save a new product
     const _nonVeganProduct = await this.productService.createProduct(
       nonVeganProduct.name,
       false,
       nonVeganProduct.imageUrl,
       nonVeganProduct.animalIngredients,
     );
-    const _initiator = await this.pleaganService.addPleagan(
-      initiator,
-    );
-    const _company = await this.companyService.createCompany(company.name);
-    const _plea = this.createPlea(PLEA_STATUS.UNNOTIFIED, _company, _initiator, _nonVeganProduct);
+
+    // Retrieve pleagan entity of user that initiated this plea
+    const _initiator = await this.pleaganService.getPleaganByUid( pleaganUid );
+
+    // Get company if it is known, create and save if it isn't
+    const _company = await this.companyService.getOrCreateAndSaveCompany( company.name );
+
+    // Construct plea instance
+    const _plea = this.createPlea( description, _company, _initiator, _nonVeganProduct, [ _initiator ] );
+
+    // Save and return promise
     return await this.pleaRepository.save(_plea);
   }
 
-  async supportPlea(id: number, { uid, displayName, email, emailVerified}: IPleagan): Promise<Plea> {
+  async supportPlea(id: number, pleaganUid: string): Promise<Plea> {
     const plea = await this.getPleaById(id);
+    const pleagan = await this.pleaganService.getPleaganByUid( pleaganUid );
 
-    if (plea.supporters.find((pleagan: Pleagan) => pleagan.email === email)) {
-      throw new ConflictException(`Pleagan with email address ${email} has already supported this plea.`);
-    }
+    // @TODO: fix
+    // if (plea.supporters.find((pleagan: Pleagan) => pleagan.email === email)) {
+    //   throw new ConflictException(`Pleagan with email address ${email} has already supported this plea.`);
+    // }
 
-    plea.supporters.push(new Pleagan(uid, displayName, email, emailVerified));
+    plea.supporters.push( pleagan );
 
     return this.pleaRepository.save(plea);
   }
@@ -124,8 +130,8 @@ export class PleaService {
     });
   }
 
-  createPlea(status: PLEA_STATUS, company: Company, initiator: Pleagan, nonVeganProduct: Product): Plea {
-    return this.pleaRepository.create(new Plea(status, company, initiator, nonVeganProduct, null, [initiator]));
+  createPlea(description: string, company: Company, initiator: Pleagan, nonVeganProduct: Product, supporters: Pleagan[]): Plea {
+    return this.pleaRepository.create(new Plea( description, company, initiator, nonVeganProduct, supporters ));
   }
 
   private parseQuery(query: string): { companies: string[]; products: string[] } {

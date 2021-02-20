@@ -21,7 +21,10 @@ export class Plea implements IPlea {
   id?: number;
 
   @Column()
-  status: PLEA_STATUS;
+  status: PLEA_STATUS = PLEA_STATUS.UNNOTIFIED;
+
+  @Column('text')
+  description: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -63,18 +66,16 @@ export class Plea implements IPlea {
   veganProduct?: Product;
 
   constructor(
-    status: PLEA_STATUS,
+    description: string,
     company: Company,
     initiator: Pleagan,
     nonVeganProduct: Product,
-    veganProduct: Product,
-    supporters?: Pleagan[],
+    supporters: Pleagan[]
   ) {
+    this.description = description;
     this.company = company;
-    this.status = status;
     this.initiator = initiator;
-    this.supporters = supporters;
     this.nonVeganProduct = nonVeganProduct;
-    this.veganProduct = veganProduct;
+    this.supporters = supporters;
   }
 }

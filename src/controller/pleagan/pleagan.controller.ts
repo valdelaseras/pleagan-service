@@ -18,7 +18,7 @@ export class PleaganController {
     @Get()
     async getCurrentUser(@Req() req: Request): Promise<Pleagan> {
         const { uid } = req['firebaseUser'];
-        return this.pleaganService.getPleaganById( uid );
+        return this.pleaganService.getPleaganByUid( uid );
     }
 
     @Put(':uid')
