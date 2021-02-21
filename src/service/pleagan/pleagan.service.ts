@@ -38,15 +38,17 @@ export class PleaganService {
     }
   }
 
+  async getAllPleaganUids(): Promise<Pleagan[]> {
+    return await this.pleaganRepository.find({
+      select: [ 'uid' ]
+    });
+  }
+
   async updatePleagan( uid: string, pleagan: IPleagan): Promise<void> {
     try {
       await this.pleaganRepository.update( uid, pleagan );
     } catch (e) {
-      if (e instanceof QueryFailedError && e.message.indexOf('Duplicate') >= 0) {
-        LoggerService.warn(e.message, this.namespace);
-        // @TODO return proper error. Is an error even likely here?
-        throw new ConflictException(`Oopsie doopsie`);
-      }
+      console.log( e );
     }
   }
 

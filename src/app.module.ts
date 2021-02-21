@@ -11,6 +11,7 @@ import { CompanyController } from './controller/company/company.controller';
 import { ProductController } from './controller/product/product.controller';
 import { PleaganController } from './controller/pleagan/pleagan.controller';
 import { PreauthMiddleware } from './auth/preauth.middleware';
+import { AuthService } from './service/auth/auth.service';
 
 const services = [
   PleaService,
@@ -20,6 +21,7 @@ const services = [
   PersistenceService,
   ConfigurationService,
   LoggerService,
+  AuthService
 ];
 
 @Module({

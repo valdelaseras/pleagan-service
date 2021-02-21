@@ -3,6 +3,7 @@ import { IPlea, IProduct } from 'pleagan-model';
 import { PleaService } from '../../service/plea/plea.service';
 import { Plea } from '../../model/plea';
 import { Request } from 'express';
+import { IComment } from '../../model/plea/comment.interface';
 
 @Controller('plea')
 export class PleaController {
@@ -30,8 +31,8 @@ export class PleaController {
   }
 
   @Post(':id/support')
-  async supportPlea(@Param('id') id, @Req() request: Request): Promise<void> {
-    await this.pleaService.supportPlea(id, request['firebaseUser'].uid);
+  async supportPlea(@Param('id') id, @Body() comment: IComment, @Req() request: Request): Promise<void> {
+    await this.pleaService.supportPlea( id, comment, request['firebaseUser'].uid );
     return;
   }
 

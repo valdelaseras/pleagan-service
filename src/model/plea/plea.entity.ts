@@ -14,6 +14,7 @@ import {
 } from 'typeorm';
 import { IPlea, PLEA_STATUS } from 'pleagan-model';
 import { Product } from '../product';
+import { Support } from './support.entity';
 
 @Entity()
 export class Plea implements IPlea {
@@ -44,12 +45,12 @@ export class Plea implements IPlea {
   })
   initiator: Pleagan;
 
-  @ManyToMany((type) => Pleagan, (pleagan) => pleagan.supportedPleas, {
+  @ManyToMany((type) => Support, (support) => support.plea, {
     cascade: true,
     eager: true,
   })
   @JoinTable()
-  supporters: Pleagan[];
+  supports: Support[];
 
   @OneToOne(() => Product, {
     cascade: ['insert', 'update'],
@@ -70,12 +71,12 @@ export class Plea implements IPlea {
     company: Company,
     initiator: Pleagan,
     nonVeganProduct: Product,
-    supporters: Pleagan[]
+    supports: Support[]
   ) {
     this.description = description;
     this.company = company;
     this.initiator = initiator;
     this.nonVeganProduct = nonVeganProduct;
-    this.supporters = supporters;
+    this.supports = supports;
   }
 }

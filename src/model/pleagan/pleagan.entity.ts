@@ -1,14 +1,15 @@
-import { Column, Entity, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { Plea } from '../plea';
 import { IPleagan } from 'pleagan-model';
 import { IUserSettings } from 'pleagan-model/dist/model/pleagan/settings/user-settings.interface';
+import { Support } from '../plea/support.entity';
 
-@Entity()
+@Entity('Pleagan')
 export class Pleagan implements IPleagan {
   @PrimaryColumn()
   uid: string;
 
-  @Column()
+  @Column({ select: false })
   email: string;
 
   @Column('bool')
@@ -26,8 +27,8 @@ export class Pleagan implements IPleagan {
   @OneToMany((type) => Plea, (plea) => plea.initiator)
   initiatedPleas?: Plea[];
 
-  @ManyToMany((type) => Plea, (plea) => plea.supporters)
-  supportedPleas?: Plea[];
+  @OneToMany((type) => Support, (support) => support.supporter)
+  supports?: Support[];
 
   settings: IUserSettings;
 
