@@ -14,6 +14,7 @@ import {
 } from 'typeorm';
 import { IPlea, PLEA_STATUS } from 'pleagan-model';
 import { Product } from '../product';
+import { Support } from './support.entity';
 
 @Entity()
 export class Plea implements IPlea {
@@ -21,7 +22,10 @@ export class Plea implements IPlea {
   id?: number;
 
   @Column()
-  status: PLEA_STATUS;
+  status: PLEA_STATUS = PLEA_STATUS.UNNOTIFIED;
+
+  @Column('text')
+  description: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -41,12 +45,12 @@ export class Plea implements IPlea {
   })
   initiator: Pleagan;
 
-  @ManyToMany((type) => Pleagan, (pleagan) => pleagan.supportedPleas, {
+  @ManyToMany((type) => Support, (support) => support.plea, {
     cascade: true,
     eager: true,
   })
   @JoinTable()
-  supporters: Pleagan[];
+  supports: Support[];
 
   @OneToOne(() => Product, {
     cascade: ['insert', 'update'],
@@ -63,18 +67,16 @@ export class Plea implements IPlea {
   veganProduct?: Product;
 
   constructor(
-    status: PLEA_STATUS,
+    description: string,
     company: Company,
     initiator: Pleagan,
     nonVeganProduct: Product,
-    veganProduct: Product,
-    supporters?: Pleagan[],
+    supports: Support[]
   ) {
+    this.description = description;
     this.company = company;
-    this.status = status;
     this.initiator = initiator;
-    this.supporters = supporters;
     this.nonVeganProduct = nonVeganProduct;
-    this.veganProduct = veganProduct;
+    this.supports = supports;
   }
 }

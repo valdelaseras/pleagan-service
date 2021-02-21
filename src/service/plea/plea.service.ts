@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { IPlea, IPleagan, IProduct, PLEA_STATUS } from 'pleagan-model';
+import { IPlea, IProduct, PLEA_STATUS } from 'pleagan-model';
 import { getRepository, QueryFailedError, Repository, SelectQueryBuilder } from 'typeorm';
 import { PersistenceService } from '../persistence/persistence.service';
 import { LoggerService } from '../logger/logger.service';
@@ -8,45 +8,47 @@ import { ProductService } from '../product/product.service';
 import { PleaganService } from '../pleagan/pleagan.service';
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError';
 import { CompanyService } from '../company/company.service';
+import { IComment } from '../../model/plea/comment.interface';
+import { Support } from '../../model/plea/support.entity';
 
 const mockPleagan = new Pleagan(
     'some-stupid-uuid',
   'DolphinOnWheels',
   'cetaceanrave@sea.com',
-  'Wellington',
+  false
 );
+
+const mockSupport = new Support('I really like this shit');
+mockSupport.supporter = mockPleagan;
 
 const mockPleas = [
   new Plea(
-    PLEA_STATUS.UNNOTIFIED,
+      'I really like this shit',
     new Company('Kapiti Icecream'),
     mockPleagan,
     new Product('Boysenberry Icecream', false, 'kapiti.jpg'),
-    null,
-    [mockPleagan],
+      [mockSupport]
   ),
   new Plea(
-    PLEA_STATUS.COMPLIED,
+      'I really like this shit',
     new Company('Quorn'),
     mockPleagan,
     new Product('Vegetarian Meal Meat Free Soy Free Pieces', false, 'quorn.jpeg'),
-    new Product('Vegan Meal Meat Free Soy Free Pieces', true, 'quorn.jpeg'),
-    [mockPleagan],
+      [mockSupport]
   ),
   new Plea(
-    PLEA_STATUS.UNNOTIFIED,
+      'I really like this shit',
     new Company('Stoneleigh'),
     mockPleagan,
     new Product('Sauvignon Blanc', false, 'stoneleigh.jpeg'),
-    null,
-    [mockPleagan],
+      [mockSupport]
   ),
 ];
 
 @Injectable()
 export class PleaService {
-  private namespace = 'plea-service';
-  private pleaRepository: Repository<Plea>;
+  private __namespace__ = 'plea-service';
+  private __pleaRepository__: Repository<Plea>;
   constructor(
     private persistenceService: PersistenceService,
     private productService: ProductService,
@@ -57,54 +59,69 @@ export class PleaService {
   }
 
   private initialiseRepository = (): void => {
-    this.pleaRepository = getRepository(Plea);
+    this.__pleaRepository__ = getRepository(Plea);
     if ((process.env.debug = 'true')) {
       this.insertMockEntities();
     }
   };
 
   getAllPleas(): Promise<Plea[]> {
-    return this.pleaRepository.find();
+    return this.__pleaRepository__.find({
+      relations: ['supports']
+    });
   }
 
   async getPleaById(id: number): Promise<Plea> {
     try {
-      return await this.pleaRepository.findOneOrFail({ id: id });
+      return await this.__pleaRepository__.findOneOrFail({ id });
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
-        LoggerService.warn(e.message, this.namespace);
+        LoggerService.warn(e.message, this.__namespace__);
         throw new NotFoundException(`Plea with id ${id} could not be found.`);
       }
     }
   }
 
-  async addPlea({ company, initiator, nonVeganProduct }: IPlea): Promise<Plea> {
+  async addPlea({ description, company, nonVeganProduct }: IPlea, pleaganUid: string): Promise<Plea> {
+    // Create and save a new product
     const _nonVeganProduct = await this.productService.createProduct(
       nonVeganProduct.name,
       false,
       nonVeganProduct.imageUrl,
       nonVeganProduct.animalIngredients,
     );
-    const _initiator = await this.pleaganService.createPleagan(
-      initiator.displayName,
-      initiator.email,
-      initiator.country,
-    );
-    const _company = await this.companyService.createCompany(company.name);
-    const _plea = this.createPlea(PLEA_STATUS.UNNOTIFIED, _company, _initiator, _nonVeganProduct);
-    return await this.pleaRepository.save(_plea);
+
+    // Retrieve pleagan entity of user that initiated this plea
+    const _initiator = await this.pleaganService.getPleaganByUid( pleaganUid );
+
+    // Get company if it is known, create and save if it isn't
+    const _company = await this.companyService.getOrCreateAndSaveCompany( company.name );
+
+    const support = this.createSupport( description );
+    support.supporter = _initiator;
+
+    // Construct plea instance
+    const _plea = this.createPlea( description, _company, _initiator, _nonVeganProduct, [ support ] );
+
+    // Save and return promise
+    return await this.__pleaRepository__.save(_plea);
   }
 
-  async supportPlea(id: number, { displayName, email, country }: IPleagan): Promise<Plea> {
+  async supportPlea(id: number, { comment }: IComment, pleaganUid: string): Promise<Plea> {
     const plea = await this.getPleaById(id);
+    const pleagan = await this.pleaganService.getPleaganByUid( pleaganUid );
+    const support = this.createSupport( comment, plea, pleagan );
 
-    if (plea.supporters.find((pleagan: Pleagan) => pleagan.email === email)) {
-      throw new ConflictException(`Pleagan with email address ${email} has already supported this plea.`);
+    plea.supports.push( support );
+    try {
+      return await this.__pleaRepository__.save(plea);
+    } catch (e) {
+      if (e instanceof QueryFailedError && e.message.indexOf('Duplicate') >= 0) {
+        LoggerService.warn(e.message, this.__namespace__);
+        // @TODO return proper error. Is an error even likely here?
+        throw new ConflictException(`You have already supported this plea`);
+      }
     }
-
-    plea.supporters.push(new Pleagan(displayName, email, country));
-
-    return this.pleaRepository.save(plea);
   }
 
   async addVeganProduct(id: number, veganProduct: IProduct): Promise<Plea> {
@@ -116,18 +133,32 @@ export class PleaService {
     );
     plea.status = PLEA_STATUS.COMPLIED;
 
-    return this.pleaRepository.save(plea);
+    return this.__pleaRepository__.save(plea);
   }
 
   searchPleas(query: string): Promise<Plea[]> {
     const parsedQuery = query.indexOf(' ') >= 0 ? this.parseQuery(query) : { products: [query], companies: [query] };
-    return this.pleaRepository.find({
+    return this.__pleaRepository__.find({
       where: (qb: SelectQueryBuilder<Plea[]>) => this.buildQueryString(qb, parsedQuery),
     });
   }
 
-  createPlea(status: PLEA_STATUS, company: Company, initiator: Pleagan, nonVeganProduct: Product): Plea {
-    return this.pleaRepository.create(new Plea(status, company, initiator, nonVeganProduct, null, [initiator]));
+  createPlea(description: string, company: Company, initiator: Pleagan, nonVeganProduct: Product, supporters: Support[]): Plea {
+    return this.__pleaRepository__.create(new Plea( description, company, initiator, nonVeganProduct, supporters ));
+  }
+
+  createSupport( comment: string, plea?: Plea, pleagan?: Pleagan): Support {
+    const support =  new Support( comment );
+
+    if ( plea ) {
+      support.plea = plea;
+    }
+
+    if ( pleagan ) {
+      support.supporter = pleagan;
+    }
+
+    return support;
   }
 
   private parseQuery(query: string): { companies: string[]; products: string[] } {
@@ -174,13 +205,12 @@ export class PleaService {
 
   private async insertMockEntities(): Promise<void> {
     try {
-      await this.pleaRepository.save(mockPleas);
-      LoggerService.debug('Mock plea entities were inserted successfully', this.namespace);
+      await this.__pleaRepository__.save(mockPleas);
+      LoggerService.debug('Mock plea entities were inserted successfully', this.__namespace__);
     } catch (e) {
-      console.log(e);
       if (e instanceof QueryFailedError && e.message.indexOf('Duplicate') >= 0) {
-        LoggerService.warn(e.message, this.namespace);
-        LoggerService.debug('Mock plea entities have already been inserted', this.namespace);
+        LoggerService.warn(e.message, this.__namespace__);
+        LoggerService.debug('Mock plea entities have already been inserted', this.__namespace__);
       }
     }
   }

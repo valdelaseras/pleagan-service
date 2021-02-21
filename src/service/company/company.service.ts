@@ -9,6 +9,7 @@ export class CompanyService {
   private __namespace__ = 'company-service';
   private __knownCompanyNames__: string[];
   companyRepository: Repository<Company>;
+
   constructor(private persistenceService: PersistenceService) {
     this.persistenceService.connectionReadyEvent.attachOnce(this.initialiseRepository);
   }
@@ -18,6 +19,11 @@ export class CompanyService {
       this.__knownCompanyNames__.filter((knownCompanyName: string) => knownCompanyName.toLowerCase().indexOf(name.toLowerCase()) >= 0)
         .length > 0
     );
+  }
+
+  getOrCreateAndSaveCompany( name: string ): Promise<Company> {
+    return this.companyRepository.findOneOrFail({ where: { name }})
+        .catch(( error ) => ( this.createCompany( name ) ))
   }
 
   getKnownCompanies(): Promise<string[]> {
