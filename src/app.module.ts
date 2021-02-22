@@ -34,6 +34,8 @@ export class AppModule implements NestModule {
     consumer
         .apply( PreauthMiddleware )
         .forRoutes(
+        { path: '/plea/my-pleas', method: RequestMethod.GET },
+        { path: '/pleagan/', method: RequestMethod.ALL },
         { path: '/pleagan/', method: RequestMethod.ALL },
         { path: '*', method: RequestMethod.POST },
         { path: '*', method: RequestMethod.PUT }

@@ -14,6 +14,11 @@ export class PleaController {
     return this.pleaService.getAllPleas();
   }
 
+  @Get('my-pleas')
+  getPleasByPleagan(@Req() request: Request): Promise<Plea[]> {
+    return this.pleaService.getPleasByPleagan( request['firebaseUser'].uid );
+  }
+
   @Get(':id')
   getPleaById(@Param('id') id): Promise<Plea> {
     return this.pleaService.getPleaById(id);

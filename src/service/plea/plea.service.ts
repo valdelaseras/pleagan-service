@@ -71,6 +71,16 @@ export class PleaService {
     });
   }
 
+  async getPleasByPleagan( uid: string ): Promise<Plea[]> {
+    return this.__pleaRepository__.find({
+      where: {
+        initiator: {
+          uid
+        }
+      }
+    })
+  }
+
   async getPleaById(id: number): Promise<Plea> {
     try {
       return await this.__pleaRepository__.findOneOrFail({ id });
