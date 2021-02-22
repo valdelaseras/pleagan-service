@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { IPlea, IProduct, PLEA_STATUS } from 'pleagan-model';
-import { getRepository, QueryFailedError, Repository, SelectQueryBuilder } from 'typeorm';
+import { getRepository, QueryFailedError, Repository, SelectQueryBuilder, UpdateResult } from 'typeorm';
 import { PersistenceService } from '../persistence/persistence.service';
 import { LoggerService } from '../logger/logger.service';
 import { Company, Plea, Pleagan, Product } from '../../model';
@@ -49,6 +49,7 @@ const mockPleas = [
 export class PleaService {
   private __namespace__ = 'plea-service';
   private __pleaRepository__: Repository<Plea>;
+  private __supportRepository__: Repository<Support>;
   constructor(
     private persistenceService: PersistenceService,
     private productService: ProductService,
@@ -60,6 +61,7 @@ export class PleaService {
 
   private initialiseRepository = (): void => {
     this.__pleaRepository__ = getRepository(Plea);
+    this.__supportRepository__ = getRepository(Support);
     if ((process.env.debug = 'true')) {
       this.insertMockEntities();
     }
@@ -73,6 +75,7 @@ export class PleaService {
 
   async getPleasByPleagan( uid: string ): Promise<Plea[]> {
     return this.__pleaRepository__.find({
+      relations: ['supports'],
       where: {
         initiator: {
           uid
@@ -81,9 +84,25 @@ export class PleaService {
     })
   }
 
+  async getSupportsByPleagan( uid: string ): Promise<Support[]> {
+    return this.__supportRepository__.find({
+      relations: ['plea'],
+      where: {
+        supporter: {
+          uid
+        }
+      }
+    });
+  }
+
   async getPleaById(id: number): Promise<Plea> {
     try {
-      return await this.__pleaRepository__.findOneOrFail({ id });
+      return await this.__pleaRepository__.findOneOrFail({
+          relations: ['supports', 'initiator'],
+          where: {
+            id
+          }
+      });
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
         LoggerService.warn(e.message, this.__namespace__);
@@ -107,20 +126,27 @@ export class PleaService {
     // Get company if it is known, create and save if it isn't
     const _company = await this.companyService.getOrCreateAndSaveCompany( company.name );
 
-    const support = this.createSupport( description );
+    const support = await this.createSupport( description );
     support.supporter = _initiator;
 
     // Construct plea instance
     const _plea = this.createPlea( description, _company, _initiator, _nonVeganProduct, [ support ] );
+    support.plea = _plea;
 
     // Save and return promise
-    return await this.__pleaRepository__.save(_plea);
+    await this.__pleaRepository__.save(_plea);
+    await this.updateSupport( support );
+    return _plea;
+  }
+
+  private async updateSupport( support: Support ): Promise<UpdateResult> {
+    return this.__supportRepository__.update( support.id, support);
   }
 
   async supportPlea(id: number, { comment }: IComment, pleaganUid: string): Promise<Plea> {
     const plea = await this.getPleaById(id);
     const pleagan = await this.pleaganService.getPleaganByUid( pleaganUid );
-    const support = this.createSupport( comment, plea, pleagan );
+    const support = await this.createSupport( comment, plea, pleagan );
 
     plea.supports.push( support );
     try {
@@ -157,7 +183,7 @@ export class PleaService {
     return this.__pleaRepository__.create(new Plea( description, company, initiator, nonVeganProduct, supporters ));
   }
 
-  createSupport( comment: string, plea?: Plea, pleagan?: Pleagan): Support {
+  createSupport( comment: string, plea?: Plea, pleagan?: Pleagan): Promise<Support> {
     const support =  new Support( comment );
 
     if ( plea ) {
@@ -168,7 +194,7 @@ export class PleaService {
       support.supporter = pleagan;
     }
 
-    return support;
+    return this.__supportRepository__.save( support );
   }
 
   private parseQuery(query: string): { companies: string[]; products: string[] } {

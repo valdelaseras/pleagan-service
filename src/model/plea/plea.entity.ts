@@ -41,13 +41,11 @@ export class Plea implements IPlea {
 
   @ManyToOne((type) => Pleagan, (pleagan) => pleagan.initiatedPleas, {
     cascade: true,
-    eager: true,
   })
   initiator: Pleagan;
 
   @ManyToMany((type) => Support, (support) => support.plea, {
     cascade: true,
-    eager: true,
   })
   @JoinTable()
   supports: Support[];

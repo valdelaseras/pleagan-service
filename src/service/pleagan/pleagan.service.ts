@@ -29,7 +29,12 @@ export class PleaganService {
 
   async getPleaganByUid( uid: string ): Promise<Pleagan> {
     try {
-      return await this.pleaganRepository.findOneOrFail({ uid });
+      return await this.pleaganRepository.findOneOrFail({
+        select: ['email'],
+        where: {
+          uid
+        }
+      });
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
         LoggerService.warn(e.message, this.namespace);

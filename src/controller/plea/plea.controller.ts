@@ -4,6 +4,7 @@ import { PleaService } from '../../service/plea/plea.service';
 import { Plea } from '../../model/plea';
 import { Request } from 'express';
 import { IComment } from '../../model/plea/comment.interface';
+import { Support } from '../../model/plea/support.entity';
 
 @Controller('plea')
 export class PleaController {
@@ -17,6 +18,11 @@ export class PleaController {
   @Get('my-pleas')
   getPleasByPleagan(@Req() request: Request): Promise<Plea[]> {
     return this.pleaService.getPleasByPleagan( request['firebaseUser'].uid );
+  }
+
+  @Get('my-supported-pleas')
+  getSupportedPleasByPleagan(@Req() request: Request): Promise<Support[]> {
+    return this.pleaService.getSupportsByPleagan( request['firebaseUser'].uid );
   }
 
   @Get(':id')
