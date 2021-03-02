@@ -1,10 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { IPlea, IProduct } from 'pleagan-model';
 import { PleaService } from '../../service/plea/plea.service';
 import { Plea } from '../../model/plea';
 import { Request } from 'express';
 import { IComment } from '../../model/plea/comment.interface';
 import { Support } from '../../model/plea/support.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { INewPlea } from '../../model/plea/new-plea.interface';
 
 @Controller('plea')
 export class PleaController {
@@ -36,7 +38,11 @@ export class PleaController {
   }
 
   @Post()
-  async addPlea(@Body() plea: IPlea, @Req() request: Request): Promise<{ id: number }> {
+  @UseInterceptors(FileInterceptor('productImage'))
+  async addPlea(
+      @Body() plea: IPlea,
+      @Req() request: Request,
+  ): Promise<{ id: number }> {
     const { id } = await this.pleaService.addPlea( plea, request['firebaseUser'].uid );
     return { id };
   }
