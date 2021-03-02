@@ -1,7 +1,7 @@
 import {
     Column,
     CreateDateColumn,
-    Entity,
+    Entity, JoinColumn,
     ManyToOne,
     PrimaryGeneratedColumn, Unique,
     UpdateDateColumn
@@ -11,7 +11,7 @@ import { Pleagan } from '../pleagan';
 import { Plea } from './plea.entity';
 
 @Entity()
-@Unique(['supporter', 'plea'])
+@Unique(['pleagan', 'plea'])
 export class Support implements ISupport {
     @PrimaryGeneratedColumn()
     id?: number;
@@ -25,13 +25,23 @@ export class Support implements ISupport {
     @UpdateDateColumn()
     updatedAt: Date;
 
-    @ManyToOne((type) => Pleagan, (pleagan) => pleagan.supports, {
+    @ManyToOne((type) => Plea, (plea) => plea.supports, {
         eager: true
     })
-    supporter: Pleagan;
-
-    @ManyToOne((type) => Plea, ( plea ) => plea.supports)
+    @JoinColumn({
+        name: 'plea_id',
+        referencedColumnName: 'id'
+    })
     plea: Plea;
+
+    @ManyToOne((type) => Pleagan, (pleagan) => pleagan.supports,{
+        eager: true
+    })
+    @JoinColumn({
+        name: 'pleagan_uid',
+        referencedColumnName: 'uid',
+    })
+    pleagan?: Pleagan;
 
     constructor( comment: string ) {
         this.comment = comment;

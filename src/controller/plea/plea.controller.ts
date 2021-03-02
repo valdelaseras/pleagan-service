@@ -16,13 +16,13 @@ export class PleaController {
   }
 
   @Get('my-pleas')
-  getPleasByPleagan(@Req() request: Request): Promise<Plea[]> {
-    return this.pleaService.getPleasByPleagan( request['firebaseUser'].uid );
+  getPleasFromCurrentUser( @Req() request: Request): Promise<Plea[]> {
+    return this.pleaService.getPleasFromCurrentUser( request['firebaseUser'].uid );
   }
 
   @Get('my-supported-pleas')
-  getSupportedPleasByPleagan(@Req() request: Request): Promise<Support[]> {
-    return this.pleaService.getSupportsByPleagan( request['firebaseUser'].uid );
+  getSupportedPleasByPleagan(@Req() request: Request): Promise<Plea[]> {
+    return this.pleaService.getSupportedPleasByPleagan( request['firebaseUser'].uid );
   }
 
   @Get(':id')

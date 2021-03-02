@@ -14,11 +14,11 @@ export class PleaganService {
     this.persistenceService.connectionReadyEvent.attachOnce(this.initialiseRepository);
   }
 
-  async addPleagan( { uid, displayName, email , emailVerified}: IPleagan): Promise<Pleagan> {
+  async createPleagan( uid: string, displayName: string, photoURL: string): Promise<void> {
     try {
-      const pleagan = this.pleaganRepository.create(new Pleagan(uid, displayName, email, emailVerified));
-      return this.pleaganRepository.save(pleagan);
+      await this.pleaganRepository.save(new Pleagan(uid, displayName, photoURL ));
     } catch (e) {
+      console.log(e);
       if (e instanceof QueryFailedError && e.message.indexOf('Duplicate') >= 0) {
         LoggerService.warn(e.message, this.namespace);
         // @TODO return proper error. Is an error even likely here?
@@ -30,12 +30,18 @@ export class PleaganService {
   async getPleaganByUid( uid: string ): Promise<Pleagan> {
     try {
       return await this.pleaganRepository.findOneOrFail({
-        select: ['email'],
+        select: [
+          'uid',
+          'displayName',
+          'photoURL',
+          'country',
+        ],
         where: {
           uid
         }
       });
     } catch (e) {
+      console.log(e);
       if (e instanceof EntityNotFoundError) {
         LoggerService.warn(e.message, this.namespace);
         throw new NotFoundException(`Pleagan with uid ${ uid } could not be found.`);
@@ -43,13 +49,7 @@ export class PleaganService {
     }
   }
 
-  async getAllPleaganUids(): Promise<Pleagan[]> {
-    return await this.pleaganRepository.find({
-      select: [ 'uid' ]
-    });
-  }
-
-  async updatePleagan( uid: string, pleagan: IPleagan): Promise<void> {
+  async updatePleagan( uid: string, pleagan: IPleagan ): Promise<void> {
     try {
       await this.pleaganRepository.update( uid, pleagan );
     } catch (e) {

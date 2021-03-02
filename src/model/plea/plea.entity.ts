@@ -5,7 +5,6 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  JoinTable,
   ManyToMany,
   ManyToOne,
   OneToOne,
@@ -34,20 +33,16 @@ export class Plea implements IPlea {
   updatedAt: Date;
 
   @ManyToOne((type) => Company, (company) => company.pleas, {
-    cascade: true,
     eager: true,
   })
+  @JoinColumn()
   company: Company;
 
-  @ManyToOne((type) => Pleagan, (pleagan) => pleagan.initiatedPleas, {
-    cascade: true,
-  })
-  initiator: Pleagan;
+  @ManyToOne((type) => Pleagan, (pleagan) => pleagan.initiatedPleas )
+  @JoinColumn()
+  pleagan: Pleagan;
 
-  @ManyToMany((type) => Support, (support) => support.plea, {
-    cascade: true,
-  })
-  @JoinTable()
+  @ManyToMany((type) => Support, (support) => support.plea )
   supports: Support[];
 
   @OneToOne(() => Product, {
@@ -69,12 +64,10 @@ export class Plea implements IPlea {
     company: Company,
     initiator: Pleagan,
     nonVeganProduct: Product,
-    supports: Support[]
   ) {
     this.description = description;
     this.company = company;
-    this.initiator = initiator;
+    this.pleagan = initiator;
     this.nonVeganProduct = nonVeganProduct;
-    this.supports = supports;
   }
 }

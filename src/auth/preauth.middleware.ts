@@ -2,6 +2,8 @@ import { HttpException, HttpStatus, Injectable, NestMiddleware } from '@nestjs/c
 import { NextFunction, Request, Response } from 'express';
 import { LoggerService } from '../service/logger/logger.service';
 import * as firebase from 'firebase-admin';
+import { auth } from 'firebase-admin/lib/auth';
+import DecodedIdToken = auth.DecodedIdToken;
 
 
 @Injectable()
@@ -14,7 +16,11 @@ export class PreauthMiddleware implements NestMiddleware {
             req['firebaseUser'] = await firebase
                 .auth()
                 .verifyIdToken( token )
+                .then( ( decodedIdToken: DecodedIdToken ) => {
+                    return firebase.auth().getUser( decodedIdToken.uid );
+                })
                 .catch( err => {
+                    console.log(err);
                     const message = `Token could not be verified for call to ${ req.path }`;
                     LoggerService.warn( message );
                     throw new HttpException( { message, err }, HttpStatus.UNAUTHORIZED )
