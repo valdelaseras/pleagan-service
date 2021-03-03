@@ -5,8 +5,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  ManyToMany,
-  ManyToOne,
+  ManyToOne, OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -42,7 +41,7 @@ export class Plea implements IPlea {
   @JoinColumn()
   pleagan: Pleagan;
 
-  @ManyToMany((type) => Support, (support) => support.plea )
+  @OneToMany((type) => Support, (support) => support.plea )
   supports: Support[];
 
   @OneToOne(() => Product, {
@@ -58,6 +57,8 @@ export class Plea implements IPlea {
   })
   @JoinColumn()
   veganProduct?: Product;
+
+  numberOfSupports: number;
 
   constructor(
     description: string,

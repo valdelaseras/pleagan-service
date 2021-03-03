@@ -18,7 +18,7 @@ export class PersistenceService {
       {
         entities: [path.join(__dirname, '../../model/**/*.entity.js')],
         synchronize: true,
-        logging: false,
+        logging: true,
       },
       this.configurationService.databaseConfiguration,
     ) as ConnectionOptions;

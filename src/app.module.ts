@@ -12,6 +12,7 @@ import { ProductController } from './controller/product/product.controller';
 import { PleaganController } from './controller/pleagan/pleagan.controller';
 import { PreauthMiddleware } from './auth/preauth.middleware';
 import { FirebaseService } from './service/firebase/firebase.service';
+import { SupportService } from './service/support/support.service';
 
 const services = [
   PleaService,
@@ -21,7 +22,8 @@ const services = [
   PersistenceService,
   ConfigurationService,
   LoggerService,
-  FirebaseService
+  FirebaseService,
+  SupportService
 ];
 
 @Module({

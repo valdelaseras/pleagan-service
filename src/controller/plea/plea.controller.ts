@@ -4,13 +4,15 @@ import { PleaService } from '../../service/plea/plea.service';
 import { Plea } from '../../model/plea';
 import { Request } from 'express';
 import { IComment } from '../../model/plea/comment.interface';
-import { Support } from '../../model/plea/support.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { INewPlea } from '../../model/plea/new-plea.interface';
+import { SupportService } from '../../service/support/support.service';
 
 @Controller('plea')
 export class PleaController {
-  constructor(private pleaService: PleaService) {}
+  constructor(
+      private pleaService: PleaService,
+      private supportService: SupportService
+  ) {}
 
   @Get('all')
   getAllPleas(): Promise<Plea[]> {
@@ -49,13 +51,14 @@ export class PleaController {
 
   @Post(':id/support')
   async supportPlea(@Param('id') id, @Body() comment: IComment, @Req() request: Request): Promise<void> {
-    await this.pleaService.supportPlea( id, comment, request['firebaseUser'].uid );
+    await this.supportService.addSupport( id, comment, request['firebaseUser'].uid );
     return;
   }
 
-  @Post(':id/vegan-product')
-  async addVeganProduct(@Param('id') id, @Body() product: IProduct): Promise<void> {
-    await this.pleaService.addVeganProduct(id, product);
-    return;
-  }
+  // @TODO: re-enable later
+  // @Post(':id/vegan-product')
+  // async addVeganProduct(@Param('id') id, @Body() product: IProduct): Promise<void> {
+  //   await this.pleaService.addVeganProduct(id, product);
+  //   return;
+  // }
 }

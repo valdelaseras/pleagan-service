@@ -4,7 +4,7 @@ import { IPleagan } from 'pleagan-model';
 import { IUserSettings, THEME } from 'pleagan-model/dist/model/pleagan/settings/user-settings.interface';
 import { Support } from '../plea/support.entity';
 
-@Entity('Pleagan')
+@Entity()
 export class Pleagan implements IPleagan {
   @PrimaryColumn()
   uid: string;
@@ -20,13 +20,19 @@ export class Pleagan implements IPleagan {
   })
   country?: string = '';
 
-  @OneToMany((type) => Plea, (plea) => plea.pleagan )
+  @OneToMany((type) => Plea, (plea) => plea.pleagan, {
+    eager: false
+  })
   initiatedPleas?: Plea[];
 
-  @OneToMany((type) => Support, (support) => support.pleagan )
+  @OneToMany((type) => Support, (support) => support.pleagan, {
+    eager: false
+  })
   supports?: Support[];
 
-  @Column('simple-json')
+  @Column('simple-json', {
+    select: false
+  })
   settings: IUserSettings;
 
   constructor(uid: string, displayName: string, photoURL: string, country?: string) {

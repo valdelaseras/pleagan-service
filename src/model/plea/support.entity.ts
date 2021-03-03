@@ -29,7 +29,7 @@ export class Support implements ISupport {
         eager: true
     })
     @JoinColumn({
-        name: 'plea_id',
+        name: 'plea__id',
         referencedColumnName: 'id'
     })
     plea: Plea;
@@ -38,7 +38,7 @@ export class Support implements ISupport {
         eager: true
     })
     @JoinColumn({
-        name: 'pleagan_uid',
+        name: 'pleagan__uid',
         referencedColumnName: 'uid',
     })
     pleagan?: Pleagan;
