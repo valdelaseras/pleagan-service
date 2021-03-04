@@ -32,6 +32,16 @@
 $ npm install
 ```
 
+Pleagan services relies on firebase service account credentials. These credentials are stored in json format.
+Export an environment variable pointing to said file by executing:
+```bash
+$ export GOOGLE_APPLICATION_CREDENTIALS=path/to/file.json
+```
+To register the environment variable temporarily in the current shell session.
+
+Alternatively you can setup a build configuration in IntellIJ:
+![intellij build configuration](./images/built-settings.png)
+
 ## Running the app
 
 ```bash
