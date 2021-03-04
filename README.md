@@ -42,6 +42,10 @@ To register the environment variable temporarily in the current shell session.
 Alternatively you can setup a build configuration in IntellIJ:
 ![intellij build configuration](./images/built-settings.png)
 
+One use the provided `docker-compose.yml` file to quickly setup a local database for development purposes, or set up one themselves and refer to it by updating the `.env` file.
+
+![.env file](./images/env.png)
+
 ## Running the app
 
 ```bash
