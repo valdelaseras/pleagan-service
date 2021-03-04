@@ -1,8 +1,8 @@
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { PleaController } from './controller/plea/plea.controller';
 import { PleaService } from './service/plea/plea.service';
 import { PersistenceService } from './service/persistence/persistence.service';
-import { ConfigurationService } from './service/configuration/configuration.service';
 import { LoggerService } from './service/logger/logger.service';
 import { ProductService } from './service/product/product.service';
 import { PleaganService } from './service/pleagan/pleagan.service';
@@ -13,6 +13,7 @@ import { PleaganController } from './controller/pleagan/pleagan.controller';
 import { PreauthMiddleware } from './auth/preauth.middleware';
 import { FirebaseService } from './service/firebase/firebase.service';
 import { SupportService } from './service/support/support.service';
+import configuration from './configuration';
 
 const services = [
   PleaService,
@@ -20,14 +21,15 @@ const services = [
   CompanyService,
   PleaganService,
   PersistenceService,
-  ConfigurationService,
   LoggerService,
   FirebaseService,
   SupportService
 ];
 
 @Module({
-  imports: [],
+  imports: [ ConfigModule.forRoot({
+    load: [ configuration ]
+  }) ],
   controllers: [PleaController, CompanyController, ProductController, PleaganController],
   providers: services,
 })
