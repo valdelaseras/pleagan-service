@@ -1,20 +1,16 @@
 import {
-  BadRequestException,
-  ConflictException, ForbiddenException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
-  UnauthorizedException
 } from '@nestjs/common';
-import { IPlea, IProduct, PLEA_STATUS } from 'pleagan-model';
-import { getRepository, In, QueryFailedError, Repository, SelectQueryBuilder, UpdateResult } from 'typeorm';
+import { IPlea } from 'pleagan-model';
+import { getRepository, Repository, SelectQueryBuilder } from 'typeorm';
 import { PersistenceService } from '../persistence/persistence.service';
-import { LoggerService } from '../logger/logger.service';
 import { Company, Plea, Pleagan, Product } from '../../model';
 import { ProductService } from '../product/product.service';
 import { PleaganService } from '../pleagan/pleagan.service';
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError';
 import { CompanyService } from '../company/company.service';
-import { IComment } from '../../model/plea/comment.interface';
 import { Support } from '../../model/plea/support.entity';
 
 @Injectable()
