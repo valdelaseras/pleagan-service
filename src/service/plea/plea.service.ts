@@ -1,4 +1,10 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException, ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException
+} from '@nestjs/common';
 import { IPlea, IProduct, PLEA_STATUS } from 'pleagan-model';
 import { getRepository, In, QueryFailedError, Repository, SelectQueryBuilder, UpdateResult } from 'typeorm';
 import { PersistenceService } from '../persistence/persistence.service';
@@ -130,6 +136,18 @@ export class PleaService {
       return await this.createPlea( description, _company, pleagan, _nonVeganProduct );
     } catch ( e ) {
       console.log(e);
+    }
+  }
+
+  async updatePlea( pleaId: number, plea: IPlea, pleaganUid: string ): Promise<void> {
+    const results = await this.__pleaRepository__
+        .createQueryBuilder()
+        .update( Plea )
+        .set({ description: plea.description })
+        .where( 'plea.id = :id AND pleagan.uid = :uid', { id: pleaId, uid: pleaganUid } )
+        .execute();
+    if ( !results.affected ) {
+      throw new ForbiddenException(`You can only update your own pleas.`);
     }
   }
 

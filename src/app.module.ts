@@ -13,6 +13,7 @@ import { PleaganController } from './controller/pleagan/pleagan.controller';
 import { PreauthMiddleware } from './auth/preauth.middleware';
 import { FirebaseService } from './service/firebase/firebase.service';
 import { SupportService } from './service/support/support.service';
+import { SupportController } from './controller/support/support.controller';
 import configuration from './configuration';
 
 const services = [
@@ -30,7 +31,7 @@ const services = [
   imports: [ ConfigModule.forRoot({
     load: [ configuration ]
   }) ],
-  controllers: [PleaController, CompanyController, ProductController, PleaganController],
+  controllers: [PleaController, CompanyController, ProductController, PleaganController, SupportController],
   providers: services,
 })
 export class AppModule implements NestModule {
@@ -40,7 +41,6 @@ export class AppModule implements NestModule {
         .forRoutes(
         { path: '/plea/my-pleas', method: RequestMethod.GET },
         { path: '/plea/my-supported-pleas', method: RequestMethod.GET },
-        { path: '/pleagan/', method: RequestMethod.ALL },
         { path: '/pleagan/', method: RequestMethod.ALL },
         { path: '*', method: RequestMethod.POST },
         { path: '*', method: RequestMethod.PUT }

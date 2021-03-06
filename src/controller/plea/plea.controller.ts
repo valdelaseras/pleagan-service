@@ -1,5 +1,15 @@
-import { Body, Controller, Get, Param, Post, Query, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
-import { IPlea, IProduct } from 'pleagan-model';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+  UseInterceptors
+} from '@nestjs/common';
+import { IPlea } from 'pleagan-model';
 import { PleaService } from '../../service/plea/plea.service';
 import { Plea } from '../../model/plea';
 import { Request } from 'express';
@@ -20,39 +30,52 @@ export class PleaController {
   }
 
   @Get('my-pleas')
-  getPleasFromCurrentUser( @Req() request: Request): Promise<Plea[]> {
-    return this.pleaService.getPleasFromCurrentUser( request['firebaseUser'].uid );
+  getPleasFromCurrentUser( @Req() request: Request ): Promise<Plea[]> {
+    return this.pleaService.getPleasFromCurrentUser( request[ 'firebaseUser' ].uid );
   }
 
   @Get('my-supported-pleas')
-  getSupportedPleasByPleagan(@Req() request: Request): Promise<Plea[]> {
-    return this.pleaService.getSupportedPleasByPleagan( request['firebaseUser'].uid );
+  getSupportedPleasByPleagan( @Req() request: Request ): Promise<Plea[]> {
+    return this.pleaService.getSupportedPleasByPleagan( request[ 'firebaseUser' ].uid );
   }
 
   @Get(':id')
-  getPleaById(@Param('id') id): Promise<Plea> {
-    return this.pleaService.getPleaById(id);
+  getPleaById( @Param('id') id ): Promise<Plea> {
+    return this.pleaService.getPleaById( id );
   }
 
   @Get()
-  searchPleas(@Query('query') query): Promise<Plea[]> {
-    return this.pleaService.searchPleas(query);
+  searchPleas( @Query('query') query ): Promise<Plea[]> {
+    return this.pleaService.searchPleas( query );
   }
 
   @Post()
-  @UseInterceptors(FileInterceptor('productImage'))
+  @UseInterceptors(FileInterceptor( 'productImage' ))
   async addPlea(
       @Body() plea: IPlea,
       @Req() request: Request,
   ): Promise<{ id: number }> {
-    const { id } = await this.pleaService.addPlea( plea, request['firebaseUser'].uid );
+    const { id } = await this.pleaService.addPlea( plea, request[ 'firebaseUser' ].uid );
     return { id };
   }
 
-  @Post(':id/support')
-  async supportPlea(@Param('id') id, @Body() comment: IComment, @Req() request: Request): Promise<void> {
-    await this.supportService.addSupport( id, comment, request['firebaseUser'].uid );
+  @Post( ':id/support' )
+  async supportPlea(
+      @Param('id') id,
+      @Body() comment: IComment,
+      @Req() request: Request
+  ): Promise<void> {
+    await this.supportService.addSupport( id, comment, request[ 'firebaseUser' ].uid );
     return;
+  }
+
+  @Put( ':id' )
+  async updatePlea(
+      @Param('id') id,
+      @Body() plea: IPlea,
+      @Req() request: Request
+  ): Promise<void> {
+    await this.pleaService.updatePlea( id, plea, request[ 'firebaseUser' ].uid );
   }
 
   // @TODO: re-enable later

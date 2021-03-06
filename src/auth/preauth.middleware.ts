@@ -20,7 +20,6 @@ export class PreauthMiddleware implements NestMiddleware {
                     return firebase.auth().getUser( decodedIdToken.uid );
                 })
                 .catch( err => {
-                    console.log(err);
                     const message = `Token could not be verified for call to ${ req.path }`;
                     LoggerService.warn( message );
                     throw new HttpException( { message, err }, HttpStatus.UNAUTHORIZED )
