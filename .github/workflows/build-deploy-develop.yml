@@ -31,7 +31,7 @@ jobs:
         uses: burnett01/rsync-deployments@4.1
         with:
           switches: -avzr --delete
-          path: dist/pleagan/
+          path: dist/
           remote_path: /var/www/pleagan-service-dev/
           remote_host: pleagan.vg
           remote_user: pleagan
