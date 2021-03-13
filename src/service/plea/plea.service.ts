@@ -150,12 +150,16 @@ export class PleaService {
 
   async searchPleas(query: string): Promise<Plea[]> {
     const parsedQuery = query.indexOf(' ') >= 0 ? this.parseQuery(query) : { products: [query], companies: [query] };
-    try {
-      return this.correctNumberOfSUpportsForPleas( await this.__pleaRepository__.find({
-        where: (qb: SelectQueryBuilder<Plea[]>) => this.buildQueryString(qb, parsedQuery),
-      }));
-    } catch( e ) {
-      console.log(e);
+    if ( parsedQuery.companies.length || parsedQuery.products.length ) {
+      try {
+        return this.correctNumberOfSUpportsForPleas( await this.__pleaRepository__.find({
+          where: (qb: SelectQueryBuilder<Plea[]>) => this.buildQueryString(qb, parsedQuery),
+        }));
+      } catch( e ) {
+        console.log(e);
+      }
+    } else {
+      return [];
     }
   }
 
