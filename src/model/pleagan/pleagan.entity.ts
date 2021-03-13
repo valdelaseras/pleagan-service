@@ -40,44 +40,5 @@ export class Pleagan implements IPleagan {
     this.displayName = displayName;
     this.photoURL = photoURL;
     this.country = country || null;
-
-    this.settings = {
-      theme: THEME.DEFAULT,
-      notifications: {
-        push: {
-          enabled: false,
-          news: false,
-          myPleas: {
-            onCompliance: false,
-            onThreshold: false,
-          },
-          otherPleas: {
-            onLocation: false,
-            onNew: false,
-          },
-          supportedPleas: {
-            onCompliance: false,
-            onThreshold: false,
-          }
-        },
-
-        email: {
-          enabled: false,
-          news: false,
-          myPleas: {
-            onCompliance: false,
-            onThreshold: false,
-          },
-          otherPleas: {
-            onLocation: false,
-            onNew: false,
-          },
-          supportedPleas: {
-            onCompliance: false,
-            onThreshold: false,
-          }
-        }
-      }
-    };
   }
 }

@@ -5,6 +5,7 @@ import { LoggerService } from '../logger/logger.service';
 import { Pleagan } from '../../model/pleagan';
 import { IPleagan } from 'pleagan-model';
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError';
+import { THEME } from 'pleagan-model/dist/model/pleagan/settings/user-settings.interface';
 
 @Injectable()
 export class PleaganService {
@@ -16,7 +17,46 @@ export class PleaganService {
 
   async createPleagan( uid: string, displayName: string, photoURL: string): Promise<void> {
     try {
-      await this.pleaganRepository.save(new Pleagan(uid, displayName, photoURL ));
+      const pleagan = new Pleagan(uid, displayName, photoURL );
+      pleagan.settings = {
+        theme: THEME.DEFAULT,
+        notifications: {
+          push: {
+            enabled: false,
+            news: false,
+            myPleas: {
+              onCompliance: false,
+              onThreshold: false,
+            },
+            otherPleas: {
+              onLocation: false,
+              onNew: false,
+            },
+            supportedPleas: {
+              onCompliance: false,
+              onThreshold: false,
+            }
+          },
+
+          email: {
+            enabled: false,
+            news: false,
+            myPleas: {
+              onCompliance: false,
+              onThreshold: false,
+            },
+            otherPleas: {
+              onLocation: false,
+              onNew: false,
+            },
+            supportedPleas: {
+              onCompliance: false,
+              onThreshold: false,
+            }
+          }
+        }
+      };
+      await this.pleaganRepository.save( pleagan );
     } catch (e) {
       console.log(e);
       if (e instanceof QueryFailedError && e.message.indexOf('Duplicate') >= 0) {
