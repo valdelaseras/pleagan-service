@@ -34,7 +34,7 @@ export class PleaService {
 
   // @TODO: return count of supports instead of entity instances
   async getAllPleas(): Promise<Plea[]> {
-    return (await this.__pleaRepository__
+    return this.correctNumberOfSUpportsForPleas(await this.__pleaRepository__
         .createQueryBuilder( 'plea' )
         .leftJoinAndSelect( 'plea.nonVeganProduct', 'nonVeganProduct' )
         .leftJoinAndSelect( 'plea.veganProduct', 'veganProduct' )
@@ -43,14 +43,11 @@ export class PleaService {
         .loadRelationCountAndMap( 'plea.numberOfSupports', 'plea.supports' )
         .cache(true)
         .getMany()
-    ).map( ( plea: Plea ) => {
-      plea.numberOfSupports++;
-      return plea;
-    });
+    );
   };
 
   async getPleasFromCurrentUser( uid: string ): Promise<Plea[]> {
-      return (await this.__pleaRepository__
+      return this.correctNumberOfSUpportsForPleas( await this.__pleaRepository__
           .createQueryBuilder( 'plea' )
           .leftJoinAndSelect( 'plea.nonVeganProduct', 'nonVeganProduct' )
           .leftJoinAndSelect( 'plea.veganProduct', 'veganProduct' )
@@ -61,14 +58,11 @@ export class PleaService {
           .cache(true)
           .where( 'pleagan.uid = :uid', { uid } )
           .getMany()
-      ).map( ( plea: Plea ) => {
-        plea.numberOfSupports++;
-        return plea;
-      });
+      );
   }
 
   async getSupportedPleasByPleagan( uid: string ): Promise<Plea[]> {
-    return (await this.__pleaRepository__
+    return this.correctNumberOfSUpportsForPleas( await this.__pleaRepository__
             .createQueryBuilder( 'plea' )
             .leftJoinAndSelect( 'plea.nonVeganProduct', 'nonVeganProduct' )
             .leftJoinAndSelect( 'plea.veganProduct', 'veganProduct' )
@@ -80,15 +74,12 @@ export class PleaService {
             .cache(true)
             .where( 'support.pleagan__uid = :uid', { uid } )
             .getMany()
-    ).map( ( plea: Plea ) => {
-      plea.numberOfSupports++;
-      return plea;
-    });
+    );
   }
 
   async getPleaById(id: number): Promise<Plea> {
     try {
-      const plea = await this.__pleaRepository__
+      return this.correctNumberOfSupportsForPlea(await this.__pleaRepository__
               .createQueryBuilder( 'plea' )
               .leftJoinAndSelect( 'plea.nonVeganProduct', 'nonVeganProduct' )
               .leftJoinAndSelect( 'plea.veganProduct', 'veganProduct' )
@@ -99,10 +90,7 @@ export class PleaService {
               .loadRelationCountAndMap( 'plea.numberOfSupports', 'plea.supports' )
               .cache(true)
               .where( 'plea.id = :id', { id } )
-              .getOneOrFail();
-
-      plea.numberOfSupports++;
-      return plea;
+              .getOneOrFail());
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
         // FIXME: do not log every 404
@@ -163,9 +151,9 @@ export class PleaService {
   async searchPleas(query: string): Promise<Plea[]> {
     const parsedQuery = query.indexOf(' ') >= 0 ? this.parseQuery(query) : { products: [query], companies: [query] };
     try {
-      return await this.__pleaRepository__.find({
+      return this.correctNumberOfSUpportsForPleas( await this.__pleaRepository__.find({
         where: (qb: SelectQueryBuilder<Plea[]>) => this.buildQueryString(qb, parsedQuery),
-      });
+      }));
     } catch( e ) {
       console.log(e);
     }
@@ -177,6 +165,15 @@ export class PleaService {
     } catch ( e ) {
       console.log( e );
     }
+  }
+
+  private correctNumberOfSUpportsForPleas( pleas: Plea[] ): Plea[] {
+    return pleas.map( this.correctNumberOfSupportsForPlea );
+  }
+
+  private correctNumberOfSupportsForPlea( plea: Plea ): Plea {
+    plea.numberOfSupports++;
+    return plea;
   }
 
   private parseQuery( query: string ): { companies: string[]; products: string[] } {
@@ -218,6 +215,8 @@ export class PleaService {
       params['companyNames'] = parsedQuery.companies.join('|');
     }
 
-    qb.where(queryString, params);
+    qb.loadRelationCountAndMap( 'Plea.numberOfSupports', 'Plea.supports' );
+    qb.cache( true );
+    qb.where( queryString, params );
   }
 }
