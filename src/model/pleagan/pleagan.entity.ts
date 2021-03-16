@@ -1,7 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { Plea } from '../plea';
 import { IPleagan } from 'pleagan-model';
-import { IUserSettings, THEME } from 'pleagan-model/dist/model/pleagan/settings/user-settings.interface';
+import { IUserSettings } from 'pleagan-model/dist/model/pleagan/settings/user-settings.interface';
 import { Support } from '../plea/support.entity';
 
 @Entity()

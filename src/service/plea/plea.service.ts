@@ -34,12 +34,13 @@ export class PleaService {
 
   // @TODO: return count of supports instead of entity instances
   async getAllPleas(): Promise<Plea[]> {
-    return this.correctNumberOfSUpportsForPleas(await this.__pleaRepository__
+    return this.finalisePleas(await this.__pleaRepository__
         .createQueryBuilder( 'plea' )
         .leftJoinAndSelect( 'plea.nonVeganProduct', 'nonVeganProduct' )
         .leftJoinAndSelect( 'plea.veganProduct', 'veganProduct' )
         .leftJoinAndSelect( 'plea.company', 'company' )
         .leftJoinAndSelect( 'plea.pleagan', 'pleagan' )
+        .addSelect('pleagan.settings')
         .loadRelationCountAndMap( 'plea.numberOfSupports', 'plea.supports' )
         .cache(true)
         .getMany()
@@ -47,7 +48,7 @@ export class PleaService {
   };
 
   async getPleasFromCurrentUser( uid: string ): Promise<Plea[]> {
-      return this.correctNumberOfSUpportsForPleas( await this.__pleaRepository__
+      return this.finalisePleas( await this.__pleaRepository__
           .createQueryBuilder( 'plea' )
           .leftJoinAndSelect( 'plea.nonVeganProduct', 'nonVeganProduct' )
           .leftJoinAndSelect( 'plea.veganProduct', 'veganProduct' )
@@ -62,7 +63,7 @@ export class PleaService {
   }
 
   async getSupportedPleasByPleagan( uid: string ): Promise<Plea[]> {
-    return this.correctNumberOfSUpportsForPleas( await this.__pleaRepository__
+    return this.finalisePleas( await this.__pleaRepository__
             .createQueryBuilder( 'plea' )
             .leftJoinAndSelect( 'plea.nonVeganProduct', 'nonVeganProduct' )
             .leftJoinAndSelect( 'plea.veganProduct', 'veganProduct' )
@@ -79,19 +80,21 @@ export class PleaService {
 
   async getPleaById(id: number): Promise<Plea> {
     try {
-      return this.correctNumberOfSupportsForPlea(await this.__pleaRepository__
-              .createQueryBuilder( 'plea' )
-              .leftJoinAndSelect( 'plea.nonVeganProduct', 'nonVeganProduct' )
-              .leftJoinAndSelect( 'plea.veganProduct', 'veganProduct' )
-              .leftJoinAndSelect( 'plea.company', 'company' )
-              .leftJoinAndSelect( 'plea.pleagan', 'pleagan' )
-              .leftJoinAndSelect( 'plea.supports', 'support' )
-              .leftJoinAndSelect( 'support.pleagan', 'supporter' )
-              .loadRelationCountAndMap( 'plea.numberOfSupports', 'plea.supports' )
-              .cache(true)
-              .where( 'plea.id = :id', { id } )
-              .getOneOrFail());
+      return this.finalisePlea( await this.__pleaRepository__
+          .createQueryBuilder( 'plea' )
+          .leftJoinAndSelect( 'plea.nonVeganProduct', 'nonVeganProduct' )
+          .leftJoinAndSelect( 'plea.veganProduct', 'veganProduct' )
+          .leftJoinAndSelect( 'plea.company', 'company' )
+          .leftJoinAndSelect( 'plea.pleagan', 'pleagan' )
+          .addSelect('pleagan.settings')
+          .leftJoinAndSelect( 'plea.supports', 'support' )
+          .leftJoinAndSelect( 'support.pleagan', 'supporter' )
+          .loadRelationCountAndMap( 'plea.numberOfSupports', 'plea.supports' )
+          .cache(true)
+          .where( 'plea.id = :id', { id } )
+          .getOneOrFail() );
     } catch (e) {
+      console.log(e);
       if (e instanceof EntityNotFoundError) {
         // FIXME: do not log every 404
         // LoggerService.warn(e.message, this.__namespace__);
@@ -111,7 +114,7 @@ export class PleaService {
       );
 
       // Retrieve pleagan entity of user that initiated this plea
-      const pleagan = await this.pleaganService.getPleaganByUid( pleaganUid );
+      const pleagan = await this.pleaganService.getFullPleaganByUid( pleaganUid );
 
       // Get company if it is known, create and save if it isn't
       const _company = await this.companyService.getOrCreateAndSaveCompany( company.name );
@@ -152,7 +155,7 @@ export class PleaService {
     const parsedQuery = query.indexOf(' ') >= 0 ? this.parseQuery(query) : { products: [query], companies: [query] };
     if ( parsedQuery.companies.length || parsedQuery.products.length ) {
       try {
-        return this.correctNumberOfSUpportsForPleas( await this.__pleaRepository__.find({
+        return this.finalisePleas( await this.__pleaRepository__.find({
           where: (qb: SelectQueryBuilder<Plea[]>) => this.buildQueryString(qb, parsedQuery),
         }));
       } catch( e ) {
@@ -171,14 +174,15 @@ export class PleaService {
     }
   }
 
-  private correctNumberOfSUpportsForPleas( pleas: Plea[] ): Plea[] {
-    return pleas.map( this.correctNumberOfSupportsForPlea );
+  private finalisePleas( pleas: Plea[] ): Plea[] {
+    return pleas.map( this.finalisePlea );
   }
 
-  private correctNumberOfSupportsForPlea( plea: Plea ): Plea {
+  private finalisePlea = ( plea: Plea ): Plea => {
     plea.numberOfSupports++;
+    plea.pleagan = this.pleaganService.finalisePleagan( plea.pleagan );
     return plea;
-  }
+  };
 
   private parseQuery( query: string ): { companies: string[]; products: string[] } {
     const parsedQuery = {
