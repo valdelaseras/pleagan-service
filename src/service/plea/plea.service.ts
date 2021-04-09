@@ -34,7 +34,7 @@ export class PleaService {
 
   // @TODO: return count of supports instead of entity instances
   async getAllPleas( uid?: string ): Promise<Plea[]> {
-    const allPleas = this.finalisePleas(await this.__pleaRepository__
+    const allPleas = this.finalisePleas( await this.__pleaRepository__
         .createQueryBuilder( 'plea' )
         .leftJoinAndSelect( 'plea.nonVeganProduct', 'nonVeganProduct' )
         .leftJoinAndSelect( 'plea.veganProduct', 'veganProduct' )
@@ -42,6 +42,7 @@ export class PleaService {
         .leftJoinAndSelect( 'plea.pleagan', 'pleagan' )
         .addSelect('pleagan.settings')
         .loadRelationCountAndMap( 'plea.numberOfSupports', 'plea.supports' )
+        .orderBy( 'plea.createdAt', 'DESC' )
         .cache(true)
         .getMany()
     );
@@ -65,6 +66,7 @@ export class PleaService {
           .leftJoinAndSelect( 'plea.pleagan', 'pleagan' )
           .leftJoinAndSelect( 'plea.supports', 'supports' )
           .loadRelationCountAndMap( 'plea.numberOfSupports', 'plea.supports' )
+          .orderBy( 'plea.createdAt', 'DESC' )
           .cache(true)
           .where( 'pleagan.uid = :uid', { uid } )
           .getMany()
@@ -72,20 +74,21 @@ export class PleaService {
   }
 
   async getSupportedPleasByPleagan( uid: string ): Promise<Plea[]> {
-    return this.finalisePleas( await this.__pleaRepository__
-            .createQueryBuilder( 'plea' )
-            .leftJoinAndSelect( 'plea.nonVeganProduct', 'nonVeganProduct' )
-            .leftJoinAndSelect( 'plea.veganProduct', 'veganProduct' )
-            .leftJoinAndSelect( 'plea.company', 'company' )
-            .leftJoinAndSelect( 'plea.pleagan', 'pleagan' )
-            .leftJoinAndSelect( 'plea.supports', 'support' )
-            .leftJoinAndSelect( 'support.pleagan', 'supporter' )
-            .addSelect('pleagan.settings')
-            .loadRelationCountAndMap( 'plea.numberOfSupports', 'plea.supports' )
-            .cache(true)
-            .where( 'support.pleagan__uid = :uid', { uid } )
-            .getMany()
-    );
+      return this.finalisePleas( await this.__pleaRepository__
+          .createQueryBuilder( 'plea' )
+          .leftJoinAndSelect( 'plea.nonVeganProduct', 'nonVeganProduct' )
+          .leftJoinAndSelect( 'plea.veganProduct', 'veganProduct' )
+          .leftJoinAndSelect( 'plea.company', 'company' )
+          .leftJoinAndSelect( 'plea.pleagan', 'pleagan' )
+          .leftJoinAndSelect( 'plea.supports', 'support' )
+          .leftJoinAndSelect( 'support.pleagan', 'supporter' )
+          .addSelect('pleagan.settings')
+          .loadRelationCountAndMap( 'plea.numberOfSupports', 'plea.supports' )
+          .orderBy( 'plea.createdAt', 'DESC' )
+          .cache(true)
+          .where( 'support.pleagan__uid = :uid', { uid } )
+          .getMany()
+      );
   }
 
   async getPleaById(id: number): Promise<Plea> {
