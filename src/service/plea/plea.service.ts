@@ -49,7 +49,7 @@ export class PleaService {
     if ( uid ) {
       const supportedPleas = await this.getSupportedPleasByPleagan( uid );
       allPleas.forEach( ( plea: Plea ) => {
-        plea.userHasSupported = !!supportedPleas.find( ( supportedPlea: Plea ) => supportedPlea.id === plea.id )
+        plea.userHasSupported = !!supportedPleas.find( ( supportedPlea: Plea ) => supportedPlea.id === plea.id ) || plea.pleagan.uid == uid
       } )
     }
 
