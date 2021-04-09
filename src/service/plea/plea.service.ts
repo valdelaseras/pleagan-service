@@ -24,7 +24,7 @@ export class PleaService {
     private companyService: CompanyService,
     private pleaganService: PleaganService,
   ) {
-    this.persistenceService.connectionReadyEvent.attachOnce(this.initialiseRepository);
+    this.persistenceService.connectionReadyEvent.attachOnce( this.initialiseRepository );
   }
 
   private initialiseRepository = (): void => {
@@ -33,8 +33,8 @@ export class PleaService {
   };
 
   // @TODO: return count of supports instead of entity instances
-  async getAllPleas(): Promise<Plea[]> {
-    return this.finalisePleas(await this.__pleaRepository__
+  async getAllPleas( uid?: string ): Promise<Plea[]> {
+    const allPleas = this.finalisePleas(await this.__pleaRepository__
         .createQueryBuilder( 'plea' )
         .leftJoinAndSelect( 'plea.nonVeganProduct', 'nonVeganProduct' )
         .leftJoinAndSelect( 'plea.veganProduct', 'veganProduct' )
@@ -45,6 +45,15 @@ export class PleaService {
         .cache(true)
         .getMany()
     );
+
+    if ( uid ) {
+      const supportedPleas = await this.getSupportedPleasByPleagan( uid );
+      allPleas.forEach( ( plea: Plea ) => {
+        plea.userHasSupported = !!supportedPleas.find( ( supportedPlea: Plea ) => supportedPlea.id === plea.id )
+      } )
+    }
+
+    return allPleas;
   };
 
   async getPleasFromCurrentUser( uid: string ): Promise<Plea[]> {
@@ -71,6 +80,7 @@ export class PleaService {
             .leftJoinAndSelect( 'plea.pleagan', 'pleagan' )
             .leftJoinAndSelect( 'plea.supports', 'support' )
             .leftJoinAndSelect( 'support.pleagan', 'supporter' )
+            .addSelect('pleagan.settings')
             .loadRelationCountAndMap( 'plea.numberOfSupports', 'plea.supports' )
             .cache(true)
             .where( 'support.pleagan__uid = :uid', { uid } )
@@ -180,7 +190,9 @@ export class PleaService {
 
   private finalisePlea = ( plea: Plea ): Plea => {
     plea.numberOfSupports++;
-    plea.pleagan = this.pleaganService.finalisePleagan( plea.pleagan );
+    if ( plea.pleagan.settings ) {
+      plea.pleagan = this.pleaganService.finalisePleagan( plea.pleagan );
+    }
     return plea;
   };
 

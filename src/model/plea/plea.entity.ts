@@ -59,6 +59,7 @@ export class Plea implements IPlea {
   veganProduct?: Product;
 
   numberOfSupports: number;
+  userHasSupported: boolean;
 
   constructor(
     description: string,

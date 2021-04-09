@@ -7,7 +7,7 @@ import DecodedIdToken = auth.DecodedIdToken;
 
 
 @Injectable()
-export class PreauthMiddleware implements NestMiddleware {
+export class FirebaseUserMiddleware implements NestMiddleware {
 
     async use( req: Request, res: Response, next: NextFunction ) {
         const { authorization } = req.headers;
@@ -19,15 +19,9 @@ export class PreauthMiddleware implements NestMiddleware {
                 .then( ( decodedIdToken: DecodedIdToken ) => {
                     return firebase.auth().getUser( decodedIdToken.uid );
                 })
-                .catch( err => {
-                    const message = `Token could not be verified for call to ${ req.path }`;
-                    LoggerService.warn( message );
-                    throw new HttpException( { message, err }, HttpStatus.UNAUTHORIZED )
-                } );
-
-            next()
-        } else {
-            throw new HttpException( { message: 'Not logged in' }, HttpStatus.UNAUTHORIZED )
+                .catch( err => null );
         }
+
+        next()
     }
 }

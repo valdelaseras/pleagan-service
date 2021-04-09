@@ -15,6 +15,7 @@ import { FirebaseService } from './service/firebase/firebase.service';
 import { SupportService } from './service/support/support.service';
 import { SupportController } from './controller/support/support.controller';
 import configuration from './configuration';
+import { FirebaseUserMiddleware } from './auth/firebase-user.middleware';
 
 const services = [
   PleaService,
@@ -44,6 +45,10 @@ export class AppModule implements NestModule {
         { path: '/pleagan/', method: RequestMethod.ALL },
         { path: '*', method: RequestMethod.POST },
         { path: '*', method: RequestMethod.PUT }
+        )
+        .apply( FirebaseUserMiddleware )
+        .forRoutes(
+            { path: '/plea/all', method: RequestMethod.GET }
         );
   }
 }

@@ -6,7 +6,7 @@ import {
     PrimaryGeneratedColumn, Unique,
     UpdateDateColumn
 } from 'typeorm';
-import { ISupport } from 'pleagan-model/dist/model/plea/base/support.interfase';
+import { ISupport } from 'pleagan-model/dist/model/plea/base/support.interface';
 import { Pleagan } from '../pleagan';
 import { Plea } from './plea.entity';
 

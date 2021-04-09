@@ -16,9 +16,9 @@ export class PleaganService {
     this.persistenceService.connectionReadyEvent.attachOnce( this.initialiseRepository );
   }
 
-  async createPleagan( uid: string, displayName: string, photoURL: string ): Promise<void> {
+  async createPleagan( uid: string, displayName: string, photoURL: string, country: string ): Promise<void> {
     try {
-      const pleagan = new Pleagan( uid, displayName, photoURL );
+      const pleagan = new Pleagan( uid, displayName, photoURL, country );
       pleagan.settings = this.generateSettings();
       await this.pleaganRepository.save( pleagan );
     } catch (e) {
@@ -62,6 +62,7 @@ export class PleaganService {
           'displayName',
           'photoURL',
           'country',
+          'settings',
         ],
         where: {
           uid
@@ -92,8 +93,8 @@ export class PleaganService {
       });
     } catch (e) {
       console.log(e);
-      if (e instanceof EntityNotFoundError) {
-        LoggerService.warn(e.message, this.namespace);
+      if ( e instanceof EntityNotFoundError ) {
+        LoggerService.warn( e.message, this.namespace );
         throw new NotFoundException(`Pleagan with uid ${ uid } could not be found.`);
       }
     }

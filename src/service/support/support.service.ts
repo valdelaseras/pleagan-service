@@ -11,8 +11,6 @@ import { PersistenceService } from '../persistence/persistence.service';
 import { IComment } from '../../model/plea/comment.interface';
 import { PleaService } from '../plea/plea.service';
 import { PleaganService } from '../pleagan/pleagan.service';
-import { ISupport } from 'pleagan-model/dist/model/plea/base/support.interfase';
-import { Plea } from '../../model/plea';
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError';
 
 @Injectable()

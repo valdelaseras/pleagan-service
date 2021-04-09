@@ -18,9 +18,9 @@ export class PleaganController {
     }
 
     @Post()
-    async addUser( @Req() req: Request ): Promise<void> {
+    async addUser( @Req() req: Request, @Body() { country }: { country: string } ): Promise<void> {
         const { uid, displayName, photoURL } = (req['firebaseUser'] as firebase.auth.UserRecord);
-        await this.pleaganService.createPleagan( uid, displayName, photoURL );
+        await this.pleaganService.createPleagan( uid, displayName, photoURL, country );
     }
 
     @Put()

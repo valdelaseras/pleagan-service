@@ -25,8 +25,8 @@ export class PleaController {
   ) {}
 
   @Get('all')
-  getAllPleas(): Promise<Plea[]> {
-    return this.pleaService.getAllPleas();
+  getAllPleas( @Req() request: Request ): Promise<Plea[]> {
+    return this.pleaService.getAllPleas( request[ 'firebaseUser' ]?.uid );
   }
 
   @Get('my-pleas')

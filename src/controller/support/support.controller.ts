@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Put, Req } from '@nestjs/common';
-import { ISupport } from 'pleagan-model/dist/model/plea/base/support.interfase';
+import { ISupport } from 'pleagan-model/dist/model/plea/base/support.interface';
 import { Request } from 'express';
 import { SupportService } from '../../service/support/support.service';
 import { Support } from '../../model/plea/support.entity';
