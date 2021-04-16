@@ -238,8 +238,10 @@ export class PleaService {
       params['companyNames'] = parsedQuery.companies.join('|');
     }
 
-    qb.loadRelationCountAndMap( 'Plea.numberOfSupports', 'Plea.supports' );
-    qb.cache( true );
-    qb.where( queryString, params );
+    qb.leftJoinAndSelect( 'Plea.pleagan', 'pleagan' )
+        .addSelect('pleagan.settings')
+        .loadRelationCountAndMap( 'Plea.numberOfSupports', 'Plea.supports' )
+        .cache( true )
+        .where( queryString, params );
   }
 }
