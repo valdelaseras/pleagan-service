@@ -1,10 +1,11 @@
-import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryColumn, Unique } from 'typeorm';
 import { Plea } from '../plea';
 import { IPleagan } from 'pleagan-model';
 import { IUserSettings } from 'pleagan-model/dist/model/pleagan/settings/user-settings.interface';
 import { Support } from '../plea/support.entity';
 
 @Entity()
+@Unique( 'displayName', [ 'displayName' ] )
 export class Pleagan implements IPleagan {
   @PrimaryColumn()
   uid: string;

@@ -6,9 +6,12 @@ export class FirebaseService {
     private defaultApp: firebase.app.App;
 
     constructor() {
-        // console.log(process.env.GOOGLE_APPLICATION_CREDENTIALS);
         this.defaultApp = firebase.initializeApp( {
             credential: firebase.credential.applicationDefault()
         } );
+    }
+
+    removeUser( uid: string ): Promise<void> {
+        return firebase.auth().deleteUser( uid )
     }
 }

@@ -6,13 +6,14 @@ import { Pleagan } from '../../model/pleagan';
 import { IPleagan, IUserSettings } from 'pleagan-model';
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError';
 import { THEME } from 'pleagan-model/dist/model/pleagan/settings/user-settings.interface';
+import { FirebaseService } from '../firebase/firebase.service';
 
 @Injectable()
 export class PleaganService {
   private namespace = 'pleagan-service';
   pleaganRepository: Repository<Pleagan>;
 
-  constructor(private persistenceService: PersistenceService) {
+  constructor( private persistenceService: PersistenceService, private firebaseService: FirebaseService ) {
     this.persistenceService.connectionReadyEvent.attachOnce( this.initialiseRepository );
   }
 
@@ -25,8 +26,8 @@ export class PleaganService {
       console.log(e);
       if (e instanceof QueryFailedError && e.message.indexOf('Duplicate') >= 0) {
         LoggerService.warn(e.message, this.namespace);
-        // @TODO return proper error. Is an error even likely here?
-        throw new ConflictException(`Oopsie doopsie`);
+        await this.firebaseService.removeUser( uid );
+        throw new ConflictException(`Username ${ displayName } is already taken. Please enter a different one.`);
       }
     }
   }

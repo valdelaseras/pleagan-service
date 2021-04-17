@@ -1,6 +1,5 @@
-import { HttpException, HttpStatus, Injectable, NestMiddleware } from '@nestjs/common';
+import { Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
-import { LoggerService } from '../service/logger/logger.service';
 import * as firebase from 'firebase-admin';
 import { auth } from 'firebase-admin/lib/auth';
 import DecodedIdToken = auth.DecodedIdToken;
