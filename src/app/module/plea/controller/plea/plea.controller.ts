@@ -10,7 +10,6 @@ import {
   Req,
 } from '@nestjs/common';
 import { PleaService } from '../../service/plea/plea.service';
-import { CreatePleaDto, UpdatePleaDto, Plea, PLEA_TARGET, CreateCommentDto } from '../../../../model/plea';
 import { Request } from 'express';
 import { SupportService } from '../../../support/service/support/support.service';
 import { PleaganService } from '../../../pleagan/service/pleagan/pleagan.service';
@@ -19,11 +18,18 @@ import { LoggerService } from '../../../shared/service/logger/logger.service';
 import { ProductService } from '../../../product/service/product/product.service';
 import { CompanyService } from '../../../company/service/company/company.service';
 import { MessagingService } from '../../../shared/service/messaging/messaging.service';
-import { Device } from '../../../../model/device';
 import { PushService } from '../../../shared/service/messaging/push.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { InboxService } from '../../../inbox/service/inbox/inbox.service';
-import { GetPleaDto } from '../../../../model/plea/get-plea.dto';
+import {
+  CreateCommentDto,
+  CreatePleaDto,
+  Device,
+  GetPleaDto,
+  Plea,
+  PLEA_TARGET,
+  UpdatePleaDto
+} from '../../../../model';
 
 @ApiTags( 'plea' )
 @Controller('plea')

@@ -1,8 +1,6 @@
-import { GetCompanyDto } from '../company/get-company.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { ProductDto } from '../product';
-import { GetSupportDto } from '../support/get-support.dto';
-import { GetPleaCompanyDto } from '../company/get-plea-company.dto';
+import { GetPleaCompanyDto } from '../company';
 
 export class GetPleaDto {
     @ApiProperty({

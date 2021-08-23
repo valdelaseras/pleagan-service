@@ -1,8 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { CompanyService } from '../../service/company/company.service';
-import { Company } from '../../../../model/company';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { GetCompanyDto } from '../../../../model/company/get-company.dto';
+import { Company, GetCompanyDto } from '../../../../model';
 
 @ApiTags( 'company' )
 @Controller('company')

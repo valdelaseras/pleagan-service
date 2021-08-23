@@ -1,5 +1,5 @@
 import { Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Message } from './message.entity';
+import { Message } from '../message/message.entity';
 import { Pleagan } from '../pleagan';
 import { ApiProperty } from '@nestjs/swagger';
 

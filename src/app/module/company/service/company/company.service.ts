@@ -1,8 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PersistenceService } from '../../../shared/service/persistence/persistence.service';
-import { getRepository, QueryFailedError, Repository } from 'typeorm';
+import { getRepository, Repository } from 'typeorm';
 import { LoggerService } from '../../../shared/service/logger/logger.service';
-import { Company } from '../../../../model/company';
+import { Company } from '../../../../model';
 
 @Injectable()
 export class CompanyService {

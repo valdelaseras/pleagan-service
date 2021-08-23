@@ -1,11 +1,10 @@
 import { Body, Controller, ForbiddenException, Get, NotFoundException, Param, Put, Req } from '@nestjs/common';
 import { SupportService } from '../../service/support/support.service';
-import { UpdateSupportDto, Support } from '../../../../model/support';
+import { GetSupportDto, UpdateSupportDto, Support } from '../../../../model';
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError';
 import { LoggerService } from '../../../shared/service/logger/logger.service';
 import { Request } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { GetSupportDto } from '../../../../model/support';
 
 @ApiTags( 'support' )
 @Controller('support')

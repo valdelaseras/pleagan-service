@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm';
-import { Plea } from '../plea';
+import { GetPleaDto, Plea } from '../plea';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
@@ -24,7 +24,7 @@ export class Company {
   @ApiProperty({
     example: [ { id: 3, nonVeganProduct: { name: 'Mega meatballs' }, et: 'cetera' } ],
     description: 'Pleas made to this company.',
-    type: [ Plea ]
+    type: () => [ GetPleaDto ]
   })
   @OneToMany( ( type ) => Plea, ( plea ) => plea.company )
   pleas?: Plea[];

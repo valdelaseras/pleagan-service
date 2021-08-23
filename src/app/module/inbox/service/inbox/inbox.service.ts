@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { getRepository, Repository, UpdateResult } from 'typeorm';
 import { PersistenceService } from '../../../shared/service/persistence/persistence.service';
-import { Inbox, Message } from '../../../../model/inbox';
-import { Pleagan } from '../../../../model/pleagan';
 import { MessagingService } from '../../../shared/service/messaging/messaging.service';
+import { Inbox, Message, Pleagan } from 'src/app/model';
 
 @Injectable()
 export class InboxService {

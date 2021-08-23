@@ -5,9 +5,8 @@ import {
 } from '@nestjs/common';
 import { getRepository, Repository, SelectQueryBuilder } from 'typeorm';
 import { PersistenceService } from '../../../shared/service/persistence/persistence.service';
-import { Company, Plea, Pleagan, Product } from '../../../../model';
+import { Company, Plea, Pleagan, Product, UpdatePleaDto } from '../../../../model';
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError';
-import { UpdatePleaDto } from '../../../../model/plea';
 
 @Injectable()
 export class PleaService {

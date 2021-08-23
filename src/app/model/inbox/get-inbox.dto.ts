@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { GetMessageDto } from './get-message.dto';
+import { GetMessageDto } from '../message/get-message.dto';
 
 export class GetInboxDto {
     @ApiProperty({

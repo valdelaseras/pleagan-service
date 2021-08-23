@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { GetPleaDto } from '../plea/get-plea.dto';
+import { GetPleaDto } from '../plea';
 
 export class GetCompanyDto {
     @ApiProperty({
@@ -19,7 +19,7 @@ export class GetCompanyDto {
     @ApiProperty({
         example: [ { id: 3, nonVeganProduct: { name: 'Mega meatballs' }, et: 'cetera' } ],
         description: 'Pleas made to this company.',
-        type: [ GetPleaDto ]
+        type: () => [ GetPleaDto ]
     })
     pleas?: GetPleaDto[];
 }

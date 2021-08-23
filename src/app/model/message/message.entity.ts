@@ -7,7 +7,7 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from 'typeorm';
-import { Inbox } from './inbox.entity';
+import { Inbox } from '../inbox/inbox.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()

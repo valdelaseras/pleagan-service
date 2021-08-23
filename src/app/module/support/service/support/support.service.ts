@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { getRepository, Repository, UpdateResult } from 'typeorm';
-import { Support } from '../../../../model/support';
 import { PersistenceService } from '../../../shared/service/persistence/persistence.service';
-import { CreateCommentDto } from '../../../../model/plea';
-import { Pleagan } from '../../../../model/pleagan';
-import { Plea } from '../../../../model/plea';
+import { CreateCommentDto, Plea, Pleagan, Support } from '../../../../model';
 
 @Injectable()
 export class SupportService {

@@ -7,7 +7,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
       .setTitle('Pleagan Service')
-      .setDescription('The Pleagan API description')
+      .setDescription('Pleagan API docs')
       .setVersion('1.0')
       .addBearerAuth()
       .build();

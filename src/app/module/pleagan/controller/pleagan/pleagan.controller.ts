@@ -1,11 +1,9 @@
 import { Body, Controller, Get, Post, Put, Req } from '@nestjs/common';
 import { PleaganService } from '../../service/pleagan/pleagan.service';
 import { Request } from 'express';
-import { UpdatePleaganDto, Pleagan } from '../../../../model/pleagan';
 import { InboxService } from '../../../inbox/service/inbox/inbox.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { GetPleaganDto } from '../../../../model/pleagan';
-import { CreatePleaganDto } from '../../../../model/pleagan';
+import { CreatePleaganDto, GetPleaganDto, Pleagan, UpdatePleaganDto } from '../../../../model';
 
 @ApiTags( 'pleagan' )
 @Controller('pleagan')

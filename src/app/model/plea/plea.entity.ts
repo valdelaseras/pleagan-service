@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Product } from '../product';
-import { Support } from '../support/support.entity';
+import { Support } from '../support';
 import { PLEA_STATUS } from './plea-status.enum';
 import { Company } from '../company';
 

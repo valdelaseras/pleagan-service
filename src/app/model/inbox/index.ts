@@ -1,2 +1,2 @@
 export * from './inbox.entity';
-export * from './message.entity';
+export * from './get-inbox.dto';

@@ -1,9 +1,8 @@
 import { Controller, ForbiddenException, Get, Param, Req } from '@nestjs/common';
-import { Inbox } from '../../../../model/inbox';
 import { Request } from 'express';
 import { InboxService } from '../../service/inbox/inbox.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { GetInboxDto } from '../../../../model/inbox/get-inbox.dto';
+import { GetInboxDto, Inbox } from 'src/app/model';
 
 @ApiTags( 'inbox' )
 @Controller('inbox')
@@ -15,7 +14,7 @@ export class InboxController {
     @ApiResponse({
         status: 200,
         description: 'Success.' ,
-        type: GetInboxDto
+        type: () => GetInboxDto
     })
     @Get('/')
     async getInbox( @Req() request: Request ): Promise<Inbox> {

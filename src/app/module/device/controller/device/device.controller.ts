@@ -1,9 +1,8 @@
 import { Body, Controller, Delete, Get, Param, Post, Req } from '@nestjs/common';
 import { Request } from 'express';
-import { Device, GetDeviceDto } from '../../../../model/device';
 import { DeviceService } from '../../service/device/device.service';
-import { CreateDeviceDto } from '../../../../model/device';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CreateDeviceDto, Device, GetDeviceDto } from '../../../../model';
 
 @ApiTags( 'device' )
 @Controller('device')

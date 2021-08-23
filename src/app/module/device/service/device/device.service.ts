@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { Device } from 'src/app/model';
 import { getRepository, Repository } from 'typeorm';
 import { PersistenceService } from '../../../shared/service/persistence/persistence.service';
-import { Device } from '../../../../model/device';
 
 @Injectable()
 export class DeviceService {
