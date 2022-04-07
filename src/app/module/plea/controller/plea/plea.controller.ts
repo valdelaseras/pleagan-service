@@ -9,7 +9,6 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
-import { PleaService } from '../../service/plea/plea.service';
 import { Request } from 'express';
 import { SupportService } from '../../../support/service/support/support.service';
 import { PleaganService } from '../../../pleagan/service/pleagan/pleagan.service';
@@ -30,6 +29,15 @@ import {
   PLEA_TARGET,
   UpdatePleaDto
 } from '../../../../model';
+import { OrderByOptions, PleaQueryOptions, PleaService, SortDirection } from '../../service/plea/plea.service';
+
+export interface PleaQueryParams {
+  companyName?: string;
+  productName?: string;
+  orderBy?: OrderByOptions;
+  direction?: SortDirection;
+  search?: string;
+}
 
 @ApiTags( 'plea' )
 @Controller('plea')
@@ -45,16 +53,31 @@ export class PleaController {
       private pushService: PushService
   ) {}
 
-  @ApiOperation({ summary: 'Get all pleas.' })
+  // @ApiOperation({ summary: 'Get all pleas.' })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Success.',
+  //   isArray: true,
+  //   type: () => GetPleaDto
+  // })
+  // @Get('all')
+  // getAllPleas( @Req() request: Request ): Promise<Plea[]> {
+  //   return this.pleaService.getAllPleas( request[ 'firebaseUser' ]?.uid );
+  // }
+
+  @ApiOperation({ summary: 'Get all pleas to a company.' })
   @ApiResponse({
     status: 200,
     description: 'Success.',
     isArray: true,
     type: () => GetPleaDto
   })
-  @Get('all')
-  getAllPleas( @Req() request: Request ): Promise<Plea[]> {
-    return this.pleaService.getAllPleas( request[ 'firebaseUser' ]?.uid );
+  @Get('company/:companyId')
+  getAllPleasToCompany(
+      @Param('companyId') companyId: number,
+      @Req() request: Request
+  ): Promise<Plea[]> {
+    return this.pleaService.getAllPleasToCompany( companyId, request[ 'firebaseUser' ]?.uid );
   }
 
   @ApiOperation({ summary: 'Get pleas I have created.' })
@@ -106,9 +129,13 @@ export class PleaController {
     type: () => GetPleaDto
   })
   @Get()
-  searchPleas( @Query('query') query: string ): Promise<Plea[]> {
-    const parsedQuery = query.indexOf(' ') >= 0 ? this.parseQuery(query) : { products: [query], companies: [query] };
-    return this.pleaService.searchPleas( parsedQuery );
+  searchPleas(
+      @Req() request: Request,
+      @Query() params?: PleaQueryParams
+   ): Promise<Plea[]> {
+    return this.pleaService.searchPleas(
+        this.parseQueryParams( params )
+    );
   }
 
   @ApiOperation({ summary: 'Create a new plea.' })
@@ -214,22 +241,40 @@ export class PleaController {
   //   return;
   // }
 
-  private parseQuery( query: string ): { companies: string[]; products: string[] } {
-    const parsedQuery = {
-      companies: [],
-      products: [],
+  private parseQueryParams( params: PleaQueryParams ): PleaQueryOptions {
+    const {
+      search,
+      companyName,
+      productName,
+      orderBy,
+      direction
+    } = params;
+
+    const parsedParams = {
+      companyName,
+      productName,
+      orderBy,
+      direction
     };
 
-    for (const fragment of query.split(' ')) {
-      if (this.productService.isKnownProduct(fragment)) {
-        parsedQuery['products'].push(fragment);
-      }
+    if ( search ) {
+      if ( search.indexOf(' ') !== -1 ) {
+        for (const fragment of search.split(' ')) {
+          if (this.productService.isKnownProduct(fragment)) {
+            parsedParams.productName = fragment;
+          }
 
-      if (this.companyService.isKnownCompany(fragment)) {
-        parsedQuery['companies'].push(fragment);
+          if (this.companyService.isKnownCompany(fragment)) {
+            parsedParams.companyName = fragment;
+          }
+        }
+      } else {
+        parsedParams.productName = search;
+        parsedParams.companyName = search;
       }
     }
-    return parsedQuery;
+
+    return parsedParams;
   }
 
   private getCardinality( index: number ): string {
@@ -245,7 +290,7 @@ export class PleaController {
 
   private getTargetReachedText( index: number, productName: string, numberOfSupports: number, recipientIsOwner: boolean ): string {
     const header = 'Dear pleagan,\n\n';
-    const body = `${ recipientIsOwner ? 'Your' : 'The' } plea for ${ productName } has reached its ${ this.getCardinality( index ) } target of ${ numberOfSupports } supporters!\n`;
+    const body = `${ recipientIsOwner ? 'Your' : 'The' } plea for ${ productName } has reached its ${ index.toCardinal() } target of ${ numberOfSupports } supporters!\n`;
     const footer = `\nWe will keep you notified of any changes in ${ productName }'s status.\n\nKind regards,\n\nTeam Pleagan`;
     switch ( index ) {
       case 0:

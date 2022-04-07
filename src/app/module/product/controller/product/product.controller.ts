@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { ProductService } from '../../service/product/product.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Product, ProductDto } from '../../../../model';
+import { Product, GetProductDto } from '../../../../model';
 
 @ApiTags( 'product' )
 @Controller('product')
@@ -13,7 +13,7 @@ export class ProductController {
         status: 200,
         description: 'Success.',
         isArray: true,
-        type: () => ProductDto
+        type: () => GetProductDto
     })
     @Get('all')
     getProducts(): Promise<Product[]> {

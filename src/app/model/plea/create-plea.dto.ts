@@ -1,4 +1,4 @@
-import { ProductDto } from '../product';
+import { CreateProductDto } from '../product';
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateCompanyDto } from '../company';
 
@@ -6,9 +6,9 @@ export class CreatePleaDto {
     @ApiProperty({
         example: { name: 'Mega Meatballs', imageUrl: 'https://abc.xyz' },
         description: 'The non-vegan product that the pleagan would like to see veganised.',
-        type: () => ProductDto
+        type: () => CreateProductDto
     })
-    nonVeganProduct: ProductDto;
+    nonVeganProduct: CreateProductDto;
 
     @ApiProperty({
         example: { name: 'Simple sense' },
@@ -19,4 +19,10 @@ export class CreatePleaDto {
 
     @ApiProperty()
     description: string;
+
+    constructor ( nonVeganProduct: CreateProductDto, company: CreateCompanyDto, description: string ) {
+        this.nonVeganProduct = nonVeganProduct;
+        this.company = company;
+        this.description = description;
+    }
 }

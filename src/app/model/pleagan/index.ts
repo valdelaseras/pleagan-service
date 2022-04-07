@@ -1,4 +1,5 @@
 export * from './pleagan.entity';
+export * from './get-current-pleagan.dto';
 export * from './get-pleagan.dto';
 export * from './notification-settings.dto';
 export * from './create-pleagan.dto';

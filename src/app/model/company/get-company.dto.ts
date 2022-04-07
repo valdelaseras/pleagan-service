@@ -16,10 +16,10 @@ export class GetCompanyDto {
     })
     name: string;
 
-    @ApiProperty({
-        example: [ { id: 3, nonVeganProduct: { name: 'Mega meatballs' }, et: 'cetera' } ],
-        description: 'Pleas made to this company.',
-        type: () => [ GetPleaDto ]
-    })
-    pleas?: GetPleaDto[];
+    // @ApiProperty({
+    //     example: [ { id: 3, nonVeganProduct: { name: 'Mega meatballs' }, et: 'cetera' } ],
+    //     description: 'Pleas made to this company.',
+    //     type: () => [ GetPleaDto ]
+    // })
+    // pleas?: GetPleaDto[];
 }

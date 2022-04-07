@@ -3,7 +3,7 @@ import { PleaganService } from '../../service/pleagan/pleagan.service';
 import { Request } from 'express';
 import { InboxService } from '../../../inbox/service/inbox/inbox.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreatePleaganDto, GetPleaganDto, Pleagan, UpdatePleaganDto } from '../../../../model';
+import { CreatePleaganDto, GetCurrentPleaganDto, GetPleaganDto, Pleagan, UpdatePleaganDto } from '../../../../model';
 
 @ApiTags( 'pleagan' )
 @Controller('pleagan')
@@ -19,7 +19,7 @@ export class PleaganController {
     @ApiResponse({
         status: 200,
         description: 'Success.',
-        type: () => GetPleaganDto
+        type: () => GetCurrentPleaganDto
     })
     @Get()
     async getCurrentUser( @Req() req: Request ): Promise<Pleagan> {
@@ -44,7 +44,7 @@ export class PleaganController {
         const pleagan = await this.pleaganService.createPleagan( uid, displayName, photoURL, country );
 
         // Create and store an inbox for the pleagan entity
-        pleagan.inbox = await this.inboxService.createInboxForPleagan( pleagan );
+        // pleagan.inbox = await this.inboxService.createInboxForPleagan( pleagan );
         return this.pleaganService.savePleagan( pleagan );
     }
 
