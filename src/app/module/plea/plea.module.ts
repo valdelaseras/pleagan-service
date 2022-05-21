@@ -33,7 +33,7 @@ export class PleaModule implements NestModule {
       )
       .apply( FirebaseUserMiddleware )
       .forRoutes(
-          { path: '/plea/all', method: RequestMethod.GET }
+          { path: '/plea', method: RequestMethod.GET }
       );
   }
 }

@@ -40,13 +40,13 @@ export class ProductService {
       const product = this.productRepository.create(new Product(name, vegan, imageUrl, animalIngredients));
       await this.productRepository.save(product);
       this.addProductToKnownProducts(product.name);
-
       return product;
     } catch (e) {
       if (e instanceof QueryFailedError && e.message.indexOf('Duplicate') >= 0) {
         LoggerService.warn(e.message, this.nameSpace);
         throw new ConflictException(`Product with name ${name} is already assigned to a plea.`);
       }
+      console.log(e);
     }
   }
 

@@ -29,15 +29,7 @@ import {
   PLEA_TARGET,
   UpdatePleaDto
 } from '../../../../model';
-import { OrderByOptions, PleaQueryOptions, PleaService, SortDirection } from '../../service/plea/plea.service';
-
-export interface PleaQueryParams {
-  companyName?: string;
-  productName?: string;
-  orderBy?: OrderByOptions;
-  direction?: SortDirection;
-  search?: string;
-}
+import {PleaService} from '../../service/plea/plea.service';
 
 @ApiTags( 'plea' )
 @Controller('plea')
@@ -61,50 +53,50 @@ export class PleaController {
   //   type: () => GetPleaDto
   // })
   // @Get('all')
-  // getAllPleas( @Req() request: Request ): Promise<Plea[]> {
-  //   return this.pleaService.getAllPleas( request[ 'firebaseUser' ]?.uid );
+  // getAll( @Req() request: Request ): Promise<Plea[]> {
+  //   return this.pleaService.getAll( request[ 'firebaseUser' ]?.uid );
   // }
 
-  @ApiOperation({ summary: 'Get all pleas to a company.' })
-  @ApiResponse({
-    status: 200,
-    description: 'Success.',
-    isArray: true,
-    type: () => GetPleaDto
-  })
-  @Get('company/:companyId')
-  getAllPleasToCompany(
-      @Param('companyId') companyId: number,
-      @Req() request: Request
-  ): Promise<Plea[]> {
-    return this.pleaService.getAllPleasToCompany( companyId, request[ 'firebaseUser' ]?.uid );
-  }
+  // @ApiOperation({ summary: 'Get all pleas to a company.' })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Success.',
+  //   isArray: true,
+  //   type: () => GetPleaDto
+  // })
+  // @Get('company/:companyId')
+  // getAllPleasToCompany(
+  //     @Param('companyId') companyId: number,
+  //     @Req() request: Request
+  // ): Promise<Plea[]> {
+  //   return this.pleaService.getAllPleasToCompany( companyId, request[ 'firebaseUser' ]?.uid );
+  // }
 
-  @ApiOperation({ summary: 'Get pleas I have created.' })
-  @ApiResponse({
-    status: 200,
-    description: 'Success.',
-    isArray: true,
-    type: () => GetPleaDto
-  })
-  @ApiBearerAuth()
-  @Get('my-pleas')
-  getPleasFromCurrentUser( @Req() request: Request ): Promise<Plea[]> {
-    return this.pleaService.getPleasFromCurrentUser( request[ 'firebaseUser' ].uid );
-  }
+  // @ApiOperation({ summary: 'Get pleas I have created.' })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Success.',
+  //   isArray: true,
+  //   type: () => GetPleaDto
+  // })
+  // @ApiBearerAuth()
+  // @Get('my-pleas')
+  // getPleasFromCurrentUser( @Req() request: Request ): Promise<Plea[]> {
+  //   return this.pleaService.getPleasFromCurrentUser( request[ 'firebaseUser' ].uid );
+  // }
 
-  @ApiOperation({ summary: 'Get pleas I have supported.' })
-  @ApiResponse({
-    status: 200,
-    description: 'Success.',
-    isArray: true,
-    type: () => GetPleaDto
-  })
-  @ApiBearerAuth()
-  @Get('my-supported-pleas')
-  getSupportedPleasByPleagan( @Req() request: Request ): Promise<Plea[]> {
-    return this.pleaService.getSupportedPleasByPleagan( request[ 'firebaseUser' ].uid );
-  }
+  // @ApiOperation({ summary: 'Get pleas I have supported.' })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Success.',
+  //   isArray: true,
+  //   type: () => GetPleaDto
+  // })
+  // @ApiBearerAuth()
+  // @Get('my-supported-pleas')
+  // getSupportedPleasByPleagan( @Req() request: Request ): Promise<Plea[]> {
+  //   return this.pleaService.getSupportedPleasByPleagan( request[ 'firebaseUser' ].uid );
+  // }
 
   @ApiOperation({ summary: 'Get a plea.' })
   @ApiResponse({
@@ -117,8 +109,11 @@ export class PleaController {
     description: 'No plea by this id could be found.'
   })
   @Get(':id')
-  getPleaById( @Param('id') id: number ): Promise<Plea> {
-    return this.pleaService.getPleaById( id );
+  getPleaById(
+      @Param('id') id: number,
+      @Req() request: Request
+  ): Promise<Plea> {
+    return this.pleaService.getPleaById( id, request[ 'firebaseUser' ].uid );
   }
 
   @ApiOperation({ summary: 'Search for pleas.' })
@@ -129,13 +124,10 @@ export class PleaController {
     type: () => GetPleaDto
   })
   @Get()
-  searchPleas(
-      @Req() request: Request,
-      @Query() params?: PleaQueryParams
+  get(
+      @Req() request: Request
    ): Promise<Plea[]> {
-    return this.pleaService.searchPleas(
-        this.parseQueryParams( params )
-    );
+    return this.pleaService.getAll( request[ 'firebaseUser' ].uid );
   }
 
   @ApiOperation({ summary: 'Create a new plea.' })
@@ -191,7 +183,8 @@ export class PleaController {
       @Body() { comment }: CreateCommentDto,
       @Req() request: Request
   ): Promise<void> {
-    const plea = await this.pleaService.getPleaById( id );
+    const plea = { pleagan: { uid: 'abc' }} as Plea;
+    // const plea = await this.pleaService.getPleaById( id );
     const pleaganUid = request[ 'firebaseUser' ].uid;
 
     if ( pleaganUid === plea.pleagan.uid ) {
@@ -241,41 +234,41 @@ export class PleaController {
   //   return;
   // }
 
-  private parseQueryParams( params: PleaQueryParams ): PleaQueryOptions {
-    const {
-      search,
-      companyName,
-      productName,
-      orderBy,
-      direction
-    } = params;
-
-    const parsedParams = {
-      companyName,
-      productName,
-      orderBy,
-      direction
-    };
-
-    if ( search ) {
-      if ( search.indexOf(' ') !== -1 ) {
-        for (const fragment of search.split(' ')) {
-          if (this.productService.isKnownProduct(fragment)) {
-            parsedParams.productName = fragment;
-          }
-
-          if (this.companyService.isKnownCompany(fragment)) {
-            parsedParams.companyName = fragment;
-          }
-        }
-      } else {
-        parsedParams.productName = search;
-        parsedParams.companyName = search;
-      }
-    }
-
-    return parsedParams;
-  }
+  // private parseQueryParams( params: PleaQueryParams ): PleaQueryOptions {
+  //   const {
+  //     // search,
+  //     // companyName,
+  //     // productName,
+  //     orderBy,
+  //     direction
+  //   } = params;
+  //
+  //   const parsedParams = {
+  //     companyName,
+  //     productName,
+  //     orderBy,
+  //     direction
+  //   };
+  //
+  //   if ( search ) {
+  //     if ( search.indexOf(' ') !== -1 ) {
+  //       for (const fragment of search.split(' ')) {
+  //         if (this.productService.isKnownProduct(fragment)) {
+  //           parsedParams.productName = fragment;
+  //         }
+  //
+  //         if (this.companyService.isKnownCompany(fragment)) {
+  //           parsedParams.companyName = fragment;
+  //         }
+  //       }
+  //     } else {
+  //       parsedParams.productName = search;
+  //       parsedParams.companyName = search;
+  //     }
+  //   }
+  //
+  //   return parsedParams;
+  // }
 
   private getCardinality( index: number ): string {
     switch ( index ) {

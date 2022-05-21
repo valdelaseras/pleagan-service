@@ -14,16 +14,6 @@ import {
 } from '../../../../model';
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError';
 
-export type OrderByOptions = 'companyName' | 'productName' | 'createdAt' | 'numberOfSupports';
-export type SortDirection = 'ASC' | 'DESC';
-
-export interface PleaQueryOptions {
-  productName?: string;
-  companyName?: string;
-  orderBy?: OrderByOptions;
-  direction?: SortDirection;
-}
-
 @Injectable()
 export class PleaService {
   private nameSpace = 'plea-service';
@@ -38,23 +28,53 @@ export class PleaService {
     this.pleaRepository = getRepository(Plea);
   };
 
-  private generatePleasQuery( withPleaganUid?: boolean ): SelectQueryBuilder<Plea> {
-    const query =  this.pleaRepository.createQueryBuilder( 'plea' )
+  private buildPleaQuery(): SelectQueryBuilder<Plea> {
+    return this.pleaRepository.createQueryBuilder( 'plea' )
         .leftJoinAndSelect( 'plea.nonVeganProduct', 'nonVeganProduct' )
         .leftJoinAndSelect( 'plea.veganProduct', 'veganProduct' )
         .leftJoinAndSelect( 'plea.company', 'company' )
         .leftJoin( 'plea.pleagan', 'pleagan' )
-        .addSelect( [ 'pleagan.displayName', 'pleagan.uid' ] )
+        .addSelect( [ 'pleagan.displayName' ] )
         .leftJoinAndSelect( 'plea.supports', 'support' )
-        .loadRelationCountAndMap( 'plea.numberOfSupports', 'plea.supports' )
-        .orderBy( 'plea.createdAt', 'DESC' )
-        .cache(true);
+        .loadRelationCountAndMap( 'plea.numberOfSupports', 'plea.supports' );
+  }
 
-    if ( withPleaganUid ) {
-      query.addSelect( [ 'pleagan.uid' ] )
+  private async fetchPlea( pleaId: number, pleaganUid?: string ): Promise<Plea> {
+    let plea = await this.buildPleaQuery()
+        .where( 'plea.id = :pleaId', { pleaId } )
+        .getOneOrFail();
+
+    const userHasSupported = this.buildPleaQuery()
+        .where( 'support.pleagan__uid = :pleaganUid OR plea.pleaganUid = :pleaganUid', { pleaganUid } )
+        .getOne();
+
+    plea.userHasSupported = !!userHasSupported;
+
+    return plea;
+  }
+
+  private async fetchPleas( pleaganUid?: string ): Promise<Plea[]> {
+    let pleasSupported = [];
+    let pleas = await this.buildPleaQuery()
+        .orderBy( 'plea.createdAt', 'DESC' )
+        .cache(true)
+        .getMany();
+
+    if ( pleaganUid ) {
+      pleasSupported = [...(await this.pleaRepository.createQueryBuilder( 'plea' )
+          .select( 'plea.id' )
+          .leftJoin( 'plea.supports', 'support' )
+          .where( 'support.pleagan__uid = :pleaganUid OR plea.pleaganUid = :pleaganUid', { pleaganUid } )
+          .getMany())
+          .map( ( plea: Plea ) => plea.id )];
     }
 
-    return query;
+    pleas = pleas.map( ( plea: Plea ) => ({
+      ...plea,
+      userHasSupported: pleasSupported.includes( plea.id )
+    }));
+
+    return pleas;
   }
 
   // private generatePleaDetailsQuery(): SelectQueryBuilder<Plea> {
@@ -83,46 +103,37 @@ export class PleaService {
         .getOne()).numberOfSupports += 1;
   }
 
-  async getAllPleas( uid?: string ): Promise<Plea[]> {
-    const allPleas = this.correctSupportCounts(await this.generatePleasQuery( !!uid )
-        .getMany());
-
-    if ( uid ) {
-      await this.checkSupported( allPleas, uid );
-    }
+  async getAll( uid?: string ): Promise<Plea[]> {
+    const allPleas = this.correctSupportCounts(
+        await this.fetchPleas( uid )
+    );
 
     return allPleas;
   };
 
-  async getAllPleasToCompany( companyId: number, uid?: string ): Promise<Plea[]> {
-    const allPleas = this.correctSupportCounts(await this.generatePleasQuery( !!uid )
-        .where('company.id = :companyId', { companyId })
-        .getMany());
+  // async getAllPleasToCompany( companyId: number, uid?: string ): Promise<Plea[]> {
+  //   const allPleas = this.correctSupportCounts(await this.fetchPleas( !!uid )
+  //       .where('company.id = :companyId', { companyId })
+  //       .getMany());
+  //
+  //   return allPleas;
+  // };
 
-    if ( uid ) {
-      await this.checkSupported( allPleas, uid );
-    }
+  // async getPleasFromCurrentUser( uid: string ): Promise<Plea[]> {
+  //     return this.correctSupportCounts( await this.fetchPleas()
+  //         .where( 'pleagan.uid = :uid', { uid } )
+  //         .getMany());
+  // }
 
-    return allPleas;
-  };
+  // async getSupportedPleasByPleagan( uid: string ): Promise<Plea[]> {
+  //     return this.correctSupportCounts( await this.fetchPleas()
+  //         .where( 'support.pleagan__uid = :uid', { uid } )
+  //         .getMany());
+  // }
 
-  async getPleasFromCurrentUser( uid: string ): Promise<Plea[]> {
-      return this.correctSupportCounts( await this.generatePleasQuery()
-          .where( 'pleagan.uid = :uid', { uid } )
-          .getMany());
-  }
-
-  async getSupportedPleasByPleagan( uid: string ): Promise<Plea[]> {
-      return this.correctSupportCounts( await this.generatePleasQuery()
-          .where( 'support.pleagan__uid = :uid', { uid } )
-          .getMany());
-  }
-
-  async getPleaById( id: number ): Promise<Plea> {
+  async getPleaById( id: number, pleaganUid: string ): Promise<Plea> {
     try {
-      return this.correctSupportCount( await this.generatePleasQuery()
-          .where( 'plea.id = :id', { id } )
-          .getOneOrFail());
+      return this.correctSupportCount( await this.fetchPlea( id, pleaganUid ) );
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
         throw new NotFoundException(`Plea with id ${id} could not be found.`);
@@ -164,26 +175,16 @@ export class PleaService {
   //   return this.pleaRepository.save(plea);
   // }
 
-  async searchPleas( params: PleaQueryOptions ): Promise<Plea[]> {
-
-    try {
-      return this.correctSupportCounts( await this.pleaRepository.find({
-        where: (qb: SelectQueryBuilder<Plea[]>) => PleaService.buildSearchQuery(qb, params),
-      }));
-    } catch( e ) {
-      console.log(e);
-    }
-  }
-
-  private async checkSupported( pleas: Plea[], uid: string ): Promise<Plea[]> {
-    const supportedPleas = await this.getSupportedPleasByPleagan( uid );
-    pleas.forEach( ( plea: Plea ) => {
-      plea.userHasSupported = !!supportedPleas.find( ( supportedPlea: Plea ) => supportedPlea.id === plea.id ) || plea.pleagan.uid == uid;
-      delete plea.pleagan;
-    } )
-
-    return pleas;
-  }
+  // async get( params: PleaQueryOptions ): Promise<Plea[]> {
+  //
+  //   try {
+  //     return this.correctSupportCounts( await this.pleaRepository.find({
+  //       where: (qb: SelectQueryBuilder<Plea[]>) => PleaService.buildSearchQuery(qb, params),
+  //     }));
+  //   } catch( e ) {
+  //     console.log(e);
+  //   }
+  // }
 
   private async createPlea(description: string, company: Company, initiator: Pleagan, nonVeganProduct: Product ): Promise<Plea> {
     try {
@@ -202,55 +203,55 @@ export class PleaService {
     return plea;
   };
 
-  private static buildSearchQuery (
-    qb: SelectQueryBuilder<Plea[]>,
-    query: PleaQueryOptions,
-  ): void {
-    let queryString = '';
-    const params = {};
+  // private static buildSearchQuery (
+  //   qb: SelectQueryBuilder<Plea[]>,
+  //   query: PleaQueryOptions,
+  // ): void {
+  //   let queryString = '';
+  //   const params = {};
+  //
+  //   if (query.productName) {
+  //     queryString += 'Plea_nonVeganProduct.name REGEXP :productName';
+  //     params['productName'] = query.productName;
+  //   }
+  //
+  //   if (query.productName && query.companyName) {
+  //     queryString += ' OR ';
+  //   }
+  //
+  //   if (query.companyName) {
+  //     queryString += 'Plea_company.name REGEXP :companyName';
+  //     params['companyName'] = query.companyName;
+  //   }
+  //
+  //   qb.leftJoinAndSelect( 'Plea.pleagan', 'pleagan' )
+  //       .addSelect('pleagan.settings')
+  //       .loadRelationCountAndMap( 'Plea.numberOfSupports', 'Plea.supports' )
+  //       .cache( true )
+  //       .where( queryString, params );
+  //
+  //   PleaService.buildOrderByQuery( qb, query );
+  // }
 
-    if (query.productName) {
-      queryString += 'Plea_nonVeganProduct.name REGEXP :productName';
-      params['productName'] = query.productName;
-    }
+  // private static buildOrderByQuery(
+  //   qb: SelectQueryBuilder<Plea[]>,
+  //   query: PleaQueryOptions,
+  // ): void {
+  //   if ( query.orderBy ) {
+  //     qb.orderBy( PleaService.mapParamToQuery( query.orderBy ), query.direction )
+  //   }
+  // }
 
-    if (query.productName && query.companyName) {
-      queryString += ' OR ';
-    }
-
-    if (query.companyName) {
-      queryString += 'Plea_company.name REGEXP :companyName';
-      params['companyName'] = query.companyName;
-    }
-
-    qb.leftJoinAndSelect( 'Plea.pleagan', 'pleagan' )
-        .addSelect('pleagan.settings')
-        .loadRelationCountAndMap( 'Plea.numberOfSupports', 'Plea.supports' )
-        .cache( true )
-        .where( queryString, params );
-
-    PleaService.buildOrderByQuery( qb, query );
-  }
-
-  private static buildOrderByQuery(
-    qb: SelectQueryBuilder<Plea[]>,
-    query: PleaQueryOptions,
-  ): void {
-    if ( query.orderBy ) {
-      qb.orderBy( PleaService.mapParamToQuery( query.orderBy ), query.direction )
-    }
-  }
-
-  private static mapParamToQuery( param: string ): string {
-    switch ( param ) {
-      case 'companyName':
-        return 'Plea_company.name';
-      case 'productName':
-        return 'Plea_nonVeganProduct.name';
-      case 'numberOfSupports':
-        return 'Plea.numberOfSupports';
-      case 'createdAt':
-        return 'Plea.createdAt';
-    }
-  }
+  // private static mapParamToQuery( param: string ): string {
+  //   switch ( param ) {
+  //     case 'companyName':
+  //       return 'Plea_company.name';
+  //     case 'productName':
+  //       return 'Plea_nonVeganProduct.name';
+  //     case 'numberOfSupports':
+  //       return 'Plea.numberOfSupports';
+  //     case 'createdAt':
+  //       return 'Plea.createdAt';
+  //   }
+  // }
 }

@@ -68,6 +68,13 @@ export class GetPleaDto {
     numberOfSupports: number;
 
     @ApiProperty({
+        example: 'abc',
+        description: 'Unique identifier of the pleagan that initiated this plea.',
+        type: String,
+    })
+    pleaganUid: string;
+
+    @ApiProperty({
         example: true,
         description: 'Whether or not the currently logged in pleagan has already supported this plea.',
         type: Boolean
